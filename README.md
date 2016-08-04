@@ -1,1 +1,3 @@
-# fake5
+Required:
+- SBCL
+- Quicklisp: /home/quicklisp/setup.lisp
