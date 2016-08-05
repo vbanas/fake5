@@ -1,7 +1,8 @@
 (defpackage :src/simple-state
   (:use :common-lisp
         :2d-geometry
-        :src/drawer)
+        :src/drawer
+        :src/polygons)
   (:import-from :2d-geometry
                 :point-equal-p))
 
@@ -230,3 +231,43 @@
                                      (pathname-name file-pn) i))
                       (subseq fold-specs 0 i)))
           (%once file fold-specs)))))
+
+(defun area-simple-polygon (polygon)
+  "Calculate an area of a simple polygon."
+  (* 1/2
+     (polygon-orientation polygon)
+     (reduce #'+ (maplist #'(lambda (list)
+                              (let ((v1 (car list))
+                                    (v2 (if (cdr list)
+                                            (cadr list)
+                                            (car list))))
+                                (- (* (x v1)(y v2))(* (x v2)(y v1)))))
+                          (point-list polygon)))))
+
+(defun single? (lst)
+  (and lst (null (cdr lst))))
+
+(defun intersect-and-reduce (polygons)
+  (reduce
+   (lambda (ps p2)
+     (loop for p1 in ps append
+          (reduce-triangles (polygon-intersection p1 p2))))
+   (cdr polygons)
+   :initial-value (list (car polygons))))
+
+(defun union-and-reduce (polygons)
+  (reduce
+   (lambda (ps p2)
+     (loop for p1 in ps append
+          (reduce-triangles (polygon-union p1 p2))))
+   (cdr polygons)
+   :initial-value (list (car polygons))))
+
+(defun score (polygons target-polygons)
+  (let* ((polygons (union-and-reduce polygons))
+         (intersected-area-ps (intersect-and-reduce (append polygons target-polygons)))
+         (united-area-ps (union-and-reduce (append polygons target-polygons))))
+    (/ (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon intersected-area-ps)))
+       ;; (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon united-area-ps)))
+       1.0)))
+
