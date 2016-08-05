@@ -67,7 +67,7 @@
 (defun .polygon ()
   (.let* ((_ (.and (.pint) (.newline)))  ; number of vertexes, probably is odd
           (vertexes (.first (.one-or-more (.vertex)))))
-    (.identity vertexes)))
+    (.identity (make-polygon-from-point-list vertexes))))
 
 (defun .silhouette ()
   (.let* ((_ (.and (.pint) (.newline)))  ; number of polygons, probably is odd
