@@ -2,7 +2,11 @@
   :class :package-inferred-system
   :defsystem-depends-on (:asdf-package-system)
   :pathname #p"./"
-  :depends-on (:src/field :src/state :src/main :src/drawer :src/parser :src/types :src/printer)
+  :depends-on (:src/field :src/state 
+	       :src/main :src/drawer 
+	       :src/parser :src/types
+	       :src/server-api :src/printer
+	       )
   :in-order-to ((test-op (load-op :src/test/field
                                   :src/test/state
                                   :src/test/parser)))
