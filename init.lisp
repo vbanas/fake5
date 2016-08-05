@@ -17,7 +17,7 @@
 ;;(ql:quickload 'ironclad)
 ;;(ql:quickload 'babel)
 (ql:quickload 'cl-svg)
-
+(ql:quickload 'yason)
 (ql:quickload 'cl-geometry)
 (ql:quickload 'smug)
 
