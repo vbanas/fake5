@@ -17,6 +17,8 @@
 ;;(ql:quickload 'ironclad)
 ;;(ql:quickload 'babel)
 
+(ql:quickload 'cl-geometry)
+
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
                                    :inherit-configuration
