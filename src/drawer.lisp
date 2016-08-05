@@ -3,7 +3,10 @@
   (:use :common-lisp :src/field :src/utils :cl-svg :cl-geometry)
   ;;(:import-from :mcts)
   (:import-from :spatial-trees)
-  (:import-from :rectangles))
+  (:import-from :rectangles)
+  (:import-from :src/types)
+  (:export #:draw-problem
+           #:draw-polygons-to-svg))
 
 (in-package :src/drawer)
 
@@ -12,10 +15,10 @@
 (defparameter *steps* 5)
 
 (defun get-x (x)
-  (round (* x *scale*)))
+  (round (+ *border* (* x *scale*))))
 
 (defun get-y (y)
-  (round (- *scale* (* y *scale*))))
+  (round (- *scale* (- (* y *scale*) *border*))))
 
 (defun draw-field (scene)
   (let ((a1 *border*)
@@ -28,13 +31,22 @@
                                     :stroke-width 1
                                     ;;:fill-opacity (* alpha 0.6)
                                     ;;:stroke-linecap "round"
-                                    ))))
+                                    )))
+        (group2
+         (make-group scene (:stroke "gray"
+                                    ;;:fill color :opacity alpha
+                                    :stroke-width 1
+                                    ;;:fill-opacity (* alpha 0.6)
+                                    ;;:stroke-linecap "round"
+                                    :stroke-dasharray (format nil "~A,~A" *border* *border*)))))
     (draw group (:line :x1 a1 :y1 a1 :x2 a2 :y2 a1))
     (draw group (:line :x1 a1 :y1 a1 :x2 a1 :y2 a2))
     (draw group (:line :x1 a2 :y1 a2 :x2 a1 :y2 a2))
     (draw group (:line :x1 a2 :y1 a2 :x2 a2 :y2 a1))
     (loop for i from 1 to (1- *steps*)
-       do (let ((cur-a (* i step)))
+       do (let ((cur-a (+ *border* (* i step))))
+            (draw group2 (:line :x1 cur-a :y1 a3 :x2 cur-a :y2 (+ *scale* a3)))
+            (draw group2 (:line :x1 a3 :y1 cur-a :x2 (+ *scale* a3) :y2 cur-a))
             (draw group (:line :x1 cur-a :y1 (- *border* a3) :x2 cur-a :y2 (+ *border* a3)))
             (draw group (:line :x1 (- *border* a3) :y1 cur-a :x2 (+ *border* a3) :y2 cur-a))
             (draw group (:line :x1 cur-a :y1 (+ *scale* (- *border* a3)) :x2 cur-a :y2 (+ *scale* (+ *border* a3))))
@@ -47,14 +59,22 @@
 (defun draw-point (scene point)
   (draw scene (:circle :cx (get-x (x point)) :cy (get-y (y point)) :r 2)))
 
-(defun draw-polygon (scene polygon)
+(defun draw-polygon (scene polygon &key stroke)
   (let* ((points (point-list polygon))
          (string-points (format nil "~{~A~^ ~}" (mapcar (lambda (point)
                                                           (format nil "~A,~A"
                                                                   (get-x (x point))
                                                                   (get-y (y point))))
                                                         points))))
-    (draw scene (:polygon :points string-points :fill "orange"))))
+    (draw scene (:polygon :points string-points :fill "orange" :stroke stroke))))
+
+(defun draw-polygons-to-svg (polygons &key (filename "~/polygon.svg"))
+  (let ((size (+ *scale* (* 2 *border*))))
+    (with-svg-to-file
+        (scene 'svg-1.1-toplevel :height size :width size)
+        (filename :if-exists :supersede)
+      (mapc (lambda (polygon) (draw-polygon scene polygon :stroke "white")) polygons)
+      (draw-field scene))))
 
 (defun draw-line-segment (scene line-segment)
   (let ((group
@@ -69,10 +89,14 @@
                        :x2 (get-x (x (end line-segment)))
                        :y2 (get-y (y (end line-segment)))))))
 
-(defun draw-state (field &key (filename #p"~/field.svg"))
-  (declare (ignore field))
+(defun draw-problem (problem &key (filename "~/field.svg"))
   (let ((size (+ *scale* (* 2 *border*))))
     (with-svg-to-file
         (scene 'svg-1.1-toplevel :height size :width size)
         (filename :if-exists :supersede)
+      (let ((polygons (src/types:silhouette problem))
+            (lines (src/types:skeleton problem)))
+        (mapc (lambda (polygon) (draw-polygon scene polygon)) polygons)
+        (mapc (lambda (line) (draw-line-segment scene line)) lines))
       (draw-field scene))))
+
