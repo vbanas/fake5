@@ -16,6 +16,7 @@
 (ql:quickload 'apply-argv)
 ;;(ql:quickload 'ironclad)
 ;;(ql:quickload 'babel)
+(ql:quickload 'cl-svg)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
