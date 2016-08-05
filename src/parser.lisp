@@ -1,9 +1,6 @@
 (defpackage :src/parser 
   (:use :common-lisp :src/utils :src/types :cl-geometry :smug)
-  (:export #:problem
-           #:parse-problem
-           #:silhouette
-           #:skeleton))
+  (:export #:parse-problem))
 
 (in-package :src/parser)
 

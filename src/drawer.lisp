@@ -4,7 +4,7 @@
   ;;(:import-from :mcts)
   (:import-from :spatial-trees)
   (:import-from :rectangles)
-  (:import-from :src/parser))
+  (:import-from :src/types))
 
 (in-package :src/drawer)
 
@@ -84,8 +84,8 @@
     (with-svg-to-file
         (scene 'svg-1.1-toplevel :height size :width size)
         (filename :if-exists :supersede)
-      (let ((polygons (src/parser:silhouette problem))
-            (lines (src/parser:skeleton problem)))
+      (let ((polygons (src/types:silhouette problem))
+            (lines (src/types:skeleton problem)))
         (mapc (lambda (polygon) (draw-polygon scene polygon)) polygons)
         (mapc (lambda (line) (draw-line-segment scene line)) lines))
       (draw-field scene))))
