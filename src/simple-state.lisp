@@ -1,9 +1,17 @@
 (defpackage :src/simple-state
   (:use :common-lisp
+<<<<<<< HEAD
         :2d-geometry
         :src/drawer
         :src/polygons)
   (:import-from :2d-geometry
+=======
+        :cl-geometry
+        :src/utils
+        :src/drawer
+        :src/mcts)
+  (:import-from :cl-geometry
+>>>>>>> 53a7be8d2fa22af2f705588edb35131bbe244f9a
                 :point-equal-p))
 
 (in-package :src/simple-state)
@@ -29,9 +37,9 @@
     (%test :a 0 :b 1 :c -1 :x 1 :y 0 :mx 1 :my 2)
     t))
 
-(defun 2d-geometry::between-p (a b c)
+(defun cl-geometry::between-p (a b c)
   "Is c colinear with a->b and lies between them?"
-  (when (2d-geometry::colinear-p a b c)
+  (when (cl-geometry::colinear-p a b c)
     (if (= (x a)(x b))
         (or (and (>= (y c)(y a))
                  (<= (y c)(y b)))
@@ -43,9 +51,9 @@
                  (<= (x c)(x a)))))))
 
 (defun really-between-p (a b c)
-  (and (2d-geometry::between-p a b c)
-       (not (2d-geometry::point-equal-p a c))
-       (not (2d-geometry::point-equal-p b c))))
+  (and (cl-geometry::between-p a b c)
+       (not (cl-geometry::point-equal-p a c))
+       (not (cl-geometry::point-equal-p b c))))
 
 (defun split-polygon (polygon line)
   (let ((points-1 nil)
@@ -64,7 +72,7 @@
            (let* ((edge-line (line-from-segment edge))
                   (ipoint (lines-intersection-point line edge-line)))
              (if (and ipoint
-                      (2d-geometry::between-p (start edge)
+                      (cl-geometry::between-p (start edge)
                                               (end edge)
                                               ipoint))
                  (progn
@@ -104,15 +112,15 @@
                (assert1 (mapcar #'polygon->list res) expected))))
     (%test :a 0 :b 1 :c -1
            :coords '(0 0 0 2 2 2 2 0)
-           :expected '((0 0 0 1 2 1 2 0)
-                       (0 1 0 2 2 2 2 1)))
+           :expected '((0 1 0 2 2 2 2 1)
+                       (0 0 0 1 2 1 2 0)))
     (%test :a 0 :b 1 :c -2
            :coords '(0 0 0 2 2 2 2 0)
            :expected '((0 0 0 2 2 2 2 0)))
     (%test :a -1 :b 1 :c (- (/ 1 4))
            :coords '(0 0 0 1 1 1 1 0)
-           :expected '((0 0 0 1/4 3/4 1 1 1 1 0)
-                       (0 1/4 0 1 3/4 1)))))
+           :expected '((0 1/4 0 1 3/4 1)
+                       (0 0 0 1/4 3/4 1 1 1 1 0)))))
 
 (defun mirror-polygon (polygon line)
   (make-polygon-from-point-list
@@ -133,11 +141,7 @@
     (mapcar
      (lambda (polygon)
        (let ((sign
-              (some (lambda (pt)
-                      (let ((pt-sign (line-equation-res line pt)))
-                        (unless (= pt-sign 0)
-                          pt-sign)))
-                    (point-list polygon))))
+              (nth-value 1 (find-non-collinear-point line polygon))))
          (if (>= (* sign point-sign) 0)
              polygon
              (mirror-polygon polygon line))))
@@ -270,4 +274,57 @@
     (/ (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon intersected-area-ps)))
        ;; (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon united-area-ps)))
        1.0)))
+
+(defclass game-state ()
+  ((field :type list
+          :documentation "All polygons on the field"
+          :accessor field
+          :initarg :field)
+   (adjustment-matrix :type list
+                      :documentation "list of lists of values, describes translation of original problem"
+                      :accessor adjustment-matrix
+                      :initarg :adjustment-matrix)
+   (target-field :type list
+                 :documentation "List of polygons describing desired final state"
+                 :accessor target-field
+                 :initarg :target-field)))
+
+(defmethod clone-state (_ (st game-state))
+  st)
+
+(defclass action ()
+  ((folding-line :accessor folding-line
+                 :type 'line
+                 :initarg :folding-line)
+   (folding-side :accessor folding-side
+                 :type 'point
+                 :initarg :folding-side)))
+
+(defmethod next-state (_ (st game-state) action)
+  (copy-instance
+   st
+   :field (fold-polygon-list (field st)
+                             (folding-line action)
+                             (folding-side action))))
+
+(defun find-non-collinear-point (line polygon)
+  (dolist (pt (point-list polygon))
+    (let ((pt-sign (line-equation-res line pt)))
+      (unless (= pt-sign 0)
+        (return-from find-non-collinear-point
+          (values pt pt-sign)))))
+  nil)
+
+(defmethod possible-actions (_ (st game-state))
+  (loop for polygon in (target-field st) append
+       (loop for edge in (edge-list polygon) append
+            (let* ((line (line-from-segment edge))
+                   (direction-point
+                    (find-non-collinear-point line polygon)))
+              (when direction-point
+                (list
+                 (make-instance
+                  'action
+                  :folding-line line
+                  :folding-side direction-point)))))))
 

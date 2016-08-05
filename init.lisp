@@ -21,6 +21,7 @@
 (ql:quickload 'cl-geometry)
 (ql:quickload 'smug)
 (ql:quickload 'anaphora)
+(ql:quickload 'cl-fad)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
