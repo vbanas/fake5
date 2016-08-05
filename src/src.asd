@@ -8,9 +8,11 @@
 	       :src/server-api :src/printer
 	       )
   :in-order-to ((test-op (load-op :src/test/field
-                                  :src/test/state)))
+                                  :src/test/state
+                                  :src/test/parser)))
   :perform (test-op (o c)
                     (lisp-unit:run-tests :all :src/test/field)
-                    (lisp-unit:run-tests :all :src/test/state)))
+                    (lisp-unit:run-tests :all :src/test/state)
+                    (lisp-unit:run-tests :all :src/test/parser)))
 
 (register-system-packages :spatial-trees '(:rectangles))
