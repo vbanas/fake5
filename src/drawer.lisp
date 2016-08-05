@@ -141,11 +141,12 @@
         (draw-field scene)))))
 
 (defun dump-problems (problem-folder)
-  (mapc (lambda (problem-file)
-          (handler-case
-              (let ((problem (src/parser:parse-problem problem-file))
-                    (svg-filename (format nil "~A.svg" problem-file)))
-                (draw-problem problem :filename svg-filename))
-            (error (e) (format t "~A:~A~%" problem-file e))))
+  (mapcar (lambda (problem-file)
+            (handler-case
+                (let ((problem (src/parser:parse-problem problem-file))
+                      (svg-filename (format nil "~A.svg" problem-file)))
+                  (draw-problem (update-skeleton-with-intersection problem) :filename svg-filename)
+                  t)
+              (error (e) (format t "~A:~A~%" problem-file e))))
         (directory problem-folder)))
 

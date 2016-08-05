@@ -1,7 +1,8 @@
 (defpackage :src/utils
-  (:use :common-lisp :cl-geometry :src/types)
+  (:use :common-lisp :cl-geometry :src/types :cl-containers :anaphora)
   (:export #:copy-instance)
-  (:export #:polygons->problem))
+  (:export #:polygons->problem)
+  (:export #:update-skeleton-with-intersection))
 
 (in-package :src/utils)
 ;; Taken from
@@ -32,4 +33,27 @@
           polygons)
     (make-instance 'problem
                    :silhouette polygons
+                   :skeleton lines)))
+
+(defun update-skeleton-with-intersection (problem)
+  (let ((lines)
+        (queue (make-instance 'basic-queue)))
+    (mapc (lambda (edge) (insert-item queue edge)) (skeleton problem))
+    (loop while (not (empty-p queue))
+       do (let ((first (first-element queue)))
+            (delete-first queue)
+            (block iteration
+              (iterate-nodes
+               queue
+               (lambda (edge)
+                 (awhen (line-segments-intersection-point first edge :exclude-endpoints t)
+                   (push (make-instance 'line-segment :start (start first) :end it) lines)
+                   (push (make-instance 'line-segment :start (end first) :end it) lines)
+                   (push (make-instance 'line-segment :start (start edge) :end it) lines)
+                   (push (make-instance 'line-segment :start (end edge) :end it) lines)
+                   (delete-item queue edge)
+                   (return-from iteration))))
+              (push first lines))))
+    (make-instance 'problem
+                   :silhouette (silhouette problem)
                    :skeleton lines)))
