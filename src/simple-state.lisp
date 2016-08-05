@@ -1,17 +1,13 @@
 (defpackage :src/simple-state
-  (:use :common-lisp
-<<<<<<< HEAD
-        :2d-geometry
-        :src/drawer
-        :src/polygons)
-  (:import-from :2d-geometry
-=======
+  (:use :common-lisp 
         :cl-geometry
+        :src/drawer
+        :src/polygons
         :src/utils
         :src/drawer
-        :src/mcts)
+        :src/polygons
+        :src/mcts) 
   (:import-from :cl-geometry
->>>>>>> 53a7be8d2fa22af2f705588edb35131bbe244f9a
                 :point-equal-p))
 
 (in-package :src/simple-state)
