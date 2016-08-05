@@ -1,6 +1,7 @@
 (defpackage :src/utils
-  (:use :common-lisp)
-  (:export #:copy-instance))
+  (:use :common-lisp :cl-geometry :src/types)
+  (:export #:copy-instance)
+  (:export #:polygons->problem))
 
 (in-package :src/utils)
 ;; Taken from
@@ -23,3 +24,12 @@
       (setf (slot-value copy slot-name)
         (slot-value object slot-name))))
       (apply #'reinitialize-instance copy initargs))))
+
+(defun polygons->problem (polygons)
+  (let ((lines))
+    (mapc (lambda (polygon)
+            (mapc (lambda (segment) (push segment lines)) (edge-list polygon)))
+          polygons)
+    (make-instance 'problem
+                   :silhouette polygons
+                   :skeleton lines)))

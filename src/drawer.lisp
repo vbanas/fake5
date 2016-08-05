@@ -93,12 +93,14 @@
         (draw scene (:polygon :points string-points :fill "orange")))))
 
 (defun draw-polygons-to-svg (polygons &key (filename "~/polygon.svg"))
-  (with-calculated-size (polygons)
-    (with-svg-to-file
-        (scene 'svg-1.1-toplevel :height size :width size)
-        (filename :if-exists :supersede)
-      (mapc (lambda (polygon) (draw-polygon scene polygon :stroke "white")) polygons)
-      (draw-field scene))))
+  (draw-problem (polygons->problem polygons) :filename filename)
+  ;; (with-calculated-size (polygons)
+  ;;   (with-svg-to-file
+  ;;       (scene 'svg-1.1-toplevel :height size :width size)
+  ;;       (filename :if-exists :supersede)
+  ;;     (mapc (lambda (polygon) (draw-polygon scene polygon :stroke "white")) polygons)
+  ;;     (draw-field scene)))
+  )
 
 (defun draw-line-segment (scene line-segment)
   (let ((group

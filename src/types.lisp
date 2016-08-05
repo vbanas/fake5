@@ -1,5 +1,5 @@
 (defpackage :src/types
-  (:use :common-lisp :src/utils :cl-geometry)
+  (:use :common-lisp :cl-geometry)
   (:export #:problem
            #:silhouette
            #:skeleton
