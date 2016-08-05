@@ -1,6 +1,9 @@
 (defpackage :src/simple-state
   (:use :common-lisp
-        :2d-geometry))
+        :2d-geometry
+        :src/drawer)
+  (:import-from :2d-geometry
+                :point-equal-p))
 
 (in-package :src/simple-state)
 
@@ -25,6 +28,19 @@
     (%test :a 0 :b 1 :c -1 :x 1 :y 0 :mx 1 :my 2)
     t))
 
+(defun 2d-geometry::between-p (a b c)
+  "Is c colinear with a->b and lies between them?"
+  (when (2d-geometry::colinear-p a b c)
+    (if (= (x a)(x b))
+        (or (and (>= (y c)(y a))
+                 (<= (y c)(y b)))
+            (and (>= (y c)(y b))
+                 (<= (y c)(y a))))
+        (or (and (>= (x c)(x a))
+                 (<= (x c)(x b)))
+            (and (>= (x c)(x b))
+                 (<= (x c)(x a)))))))
+
 (defun really-between-p (a b c)
   (and (2d-geometry::between-p a b c)
        (not (2d-geometry::point-equal-p a c))
@@ -33,27 +49,33 @@
 (defun split-polygon (polygon line)
   (let ((points-1 nil)
         (points-2 nil)
-        (push-to-1 t))
+        (points-on-line 0))
     (labels ((%push (pt)
-               (if push-to-1
-                   (push pt points-1)
-                   (push pt points-2)))
-             (%swap ()
-               (setf push-to-1 (not push-to-1))))
+               (let ((sign (line-equation-res line pt)))
+                 (cond
+                   ((> sign 0) (push pt points-1))
+                   ((< sign 0) (push pt points-2))
+                   (t
+                    (incf points-on-line)
+                    (push pt points-1)
+                    (push pt points-2))))))
       (loop for edge in (edge-list polygon) do
            (let* ((edge-line (line-from-segment edge))
                   (ipoint (lines-intersection-point line edge-line)))
              (if (and ipoint
-                      (really-between-p (start edge)
-                                        (end edge)
-                                        ipoint))
+                      (2d-geometry::between-p (start edge)
+                                              (end edge)
+                                              ipoint))
                  (progn
                    (%push (start edge))
-                   (%push ipoint)
-                   (%swap)
-                   (%push ipoint))
+                   (unless (or (point-equal-p ipoint (start edge))
+                               (point-equal-p ipoint (end edge)))
+                     (%push ipoint)))
                  (%push (start edge))))))
-    (if points-2
+    (if (or (and points-2
+                 (not (= (length points-2) points-on-line))
+                 points-1
+                 (not (= (length points-1) points-on-line))))
         (list (make-polygon-from-point-list (reverse points-1))
               (make-polygon-from-point-list (reverse points-2)))
         (list polygon))))
@@ -85,7 +107,11 @@
                        (0 1 0 2 2 2 2 1)))
     (%test :a 0 :b 1 :c -2
            :coords '(0 0 0 2 2 2 2 0)
-           :expected '((0 0 0 2 2 2 2 0)))))
+           :expected '((0 0 0 2 2 2 2 0)))
+    (%test :a -1 :b 1 :c (- (/ 1 4))
+           :coords '(0 0 0 1 1 1 1 0)
+           :expected '((0 0 0 1/4 3/4 1 1 1 1 0)
+                       (0 1/4 0 1 3/4 1)))))
 
 (defun mirror-polygon (polygon line)
   (make-polygon-from-point-list
@@ -127,13 +153,13 @@
     (%test :a 0 :b 1 :c -1
            :x 0 :y 0
            :coords '(0 0 0 2 2 2 2 0)
-           :expected '((0 0 0 1 2 1 2 0)
-                       (2 1 2 0 0 0 0 1)))
+           :expected '((2 1 2 0 0 0 0 1)
+                       (0 0 0 1 2 1 2 0)))
     (%test :a 0 :b 1 :c -1
            :x 2 :y 2
            :coords '(0 0 0 2 2 2 2 0)
-           :expected '((2 2 2 1 0 1 0 2)
-                       (0 1 0 2 2 2 2 1)))
+           :expected '((0 1 0 2 2 2 2 1)
+                       (2 2 2 1 0 1 0 2)))
     (%test :a 0 :b 1 :c -2
            :x 0 :y 0
            :coords '(0 0 0 2 2 2 2 0)
@@ -142,4 +168,65 @@
            :x 3 :y 3
            :coords '(0 0 0 2 2 2 2 0)
            :expected '((2 4 2 2 0 2 0 4)))
+    (%test :a -1 :b 1 :c (- (/ 1 4))
+           :x 1 :y 0
+           :coords '(0 0 0 1 1 1 1 0)
+           :expected '((3/4 1 3/4 1/4 0 1/4)
+                       (0 0 0 1/4 3/4 1 1 1 1 0)))
+    (assert1
+     (mapcar
+      #'polygon->list
+      (fold-quad `((:a -1 :b 1 :c ,(- (/ 1 4)) :x 1 :y 0)
+                   (:a 1 :b 1 :c ,(- (/ 1 4)) :x 0 :y 2)
+                   (:a 1 :b 1 :c ,(- (/ 1 3)) :x 0 :y 2)
+                   (:a 1 :b 0 :c ,(- (/ 2 3)) :x 0 :y 2)
+                   (:a 0 :b 1 :c ,(- (/ 2 3)) :x 0 :y 0))))
+     '((7/12 1/3 7/12 2/3 2/3 2/3 2/3 5/12)
+       (2/3 2/3 2/3 1/4 7/12 1/4 7/12 2/3)
+       (2/3 2/3 2/3 5/12 5/12 2/3)
+       (2/3 1/4 1/12 1/4 1/24 7/24 5/12 2/3 2/3 2/3)
+       (1/24 7/24 1/12 1/3 1/12 1/4)
+       (2/3 2/3 2/3 5/12 7/12 1/3 1/3 1/3 1/3 2/3)
+       (2/3 0 1/3 0 1/3 2/3 2/3 2/3)
+       (2/3 2/3 2/3 5/12 5/12 2/3)
+       (1/24 7/24 5/12 2/3 2/3 2/3 2/3 0 1/3 0)
+       (1/3 1/12 1/3 0 1/24 7/24 1/12 1/3)
+       (1/12 1/4 1/4 1/4 1/4 1/12)
+       (1/4 1/12 1/12 1/4 1/12 1/3 1/3 1/12)))
     ))
+
+(defun fold-polygon-list (polygon-list line point)
+  (alexandria:mappend
+   (lambda (polygon)
+     (fold-polygon polygon line point))
+   polygon-list))
+
+(defun fold-quad (fold-specs)
+  (let* ((quad (make-polygon-from-coords 0 0 0 1 1 1 1 0))
+         (result (reduce (lambda (q fold-spec)
+                           (destructuring-bind (&key a b (c 0) x y)
+                               fold-spec
+                             (fold-polygon-list
+                              q
+                              (make-instance 'line :a a :b b :c c)
+                              (make-instance 'point :x x :y y))))
+                         fold-specs
+                         :initial-value (list quad))))
+    result))
+
+(defun fold-quad-and-show (file fold-specs &key animate)
+  (labels ((%once (file fold-specs)
+             (let* ((result (fold-quad fold-specs)))
+               ;; (format t "result: ~A~%"
+               ;;         (mapcar #'polygon->list result))
+               (draw-polygons-to-svg
+                result :filename file))))
+    (let ((file-pn (pathname file)))
+      (if animate
+          (loop for i from 0 to (length fold-specs) do
+               (%once (make-pathname
+                       :defaults file-pn
+                       :name (format nil "~A~A"
+                                     (pathname-name file-pn) i))
+                      (subseq fold-specs 0 i)))
+          (%once file fold-specs)))))
