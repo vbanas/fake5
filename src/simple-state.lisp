@@ -1,10 +1,10 @@
 (defpackage :src/simple-state
   (:use :common-lisp
-        :2d-geometry
+        :cl-geometry
         :src/utils
         :src/drawer
         :src/mcts)
-  (:import-from :2d-geometry
+  (:import-from :cl-geometry
                 :point-equal-p))
 
 (in-package :src/simple-state)
@@ -30,9 +30,9 @@
     (%test :a 0 :b 1 :c -1 :x 1 :y 0 :mx 1 :my 2)
     t))
 
-(defun 2d-geometry::between-p (a b c)
+(defun cl-geometry::between-p (a b c)
   "Is c colinear with a->b and lies between them?"
-  (when (2d-geometry::colinear-p a b c)
+  (when (cl-geometry::colinear-p a b c)
     (if (= (x a)(x b))
         (or (and (>= (y c)(y a))
                  (<= (y c)(y b)))
@@ -44,9 +44,9 @@
                  (<= (x c)(x a)))))))
 
 (defun really-between-p (a b c)
-  (and (2d-geometry::between-p a b c)
-       (not (2d-geometry::point-equal-p a c))
-       (not (2d-geometry::point-equal-p b c))))
+  (and (cl-geometry::between-p a b c)
+       (not (cl-geometry::point-equal-p a c))
+       (not (cl-geometry::point-equal-p b c))))
 
 (defun split-polygon (polygon line)
   (let ((points-1 nil)
@@ -65,7 +65,7 @@
            (let* ((edge-line (line-from-segment edge))
                   (ipoint (lines-intersection-point line edge-line)))
              (if (and ipoint
-                      (2d-geometry::between-p (start edge)
+                      (cl-geometry::between-p (start edge)
                                               (end edge)
                                               ipoint))
                  (progn
