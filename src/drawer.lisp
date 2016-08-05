@@ -4,7 +4,9 @@
   ;;(:import-from :mcts)
   (:import-from :spatial-trees)
   (:import-from :rectangles)
-  (:import-from :src/types))
+  (:import-from :src/types)
+  (:export #:draw-problem
+           #:draw-polygons-to-svg))
 
 (in-package :src/drawer)
 
@@ -57,14 +59,22 @@
 (defun draw-point (scene point)
   (draw scene (:circle :cx (get-x (x point)) :cy (get-y (y point)) :r 2)))
 
-(defun draw-polygon (scene polygon)
+(defun draw-polygon (scene polygon &key stroke)
   (let* ((points (point-list polygon))
          (string-points (format nil "~{~A~^ ~}" (mapcar (lambda (point)
                                                           (format nil "~A,~A"
                                                                   (get-x (x point))
                                                                   (get-y (y point))))
                                                         points))))
-    (draw scene (:polygon :points string-points :fill "orange"))))
+    (draw scene (:polygon :points string-points :fill "orange" :stroke stroke))))
+
+(defun draw-polygons-to-svg (polygons &key (filename "~/polygon.svg"))
+  (let ((size (+ *scale* (* 2 *border*))))
+    (with-svg-to-file
+        (scene 'svg-1.1-toplevel :height size :width size)
+        (filename :if-exists :supersede)
+      (mapc (lambda (polygon) (draw-polygon scene polygon :stroke "white")) polygons)
+      (draw-field scene))))
 
 (defun draw-line-segment (scene line-segment)
   (let ((group
