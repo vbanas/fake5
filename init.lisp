@@ -19,6 +19,7 @@
 (ql:quickload 'cl-svg)
 (ql:quickload 'yason)
 (ql:quickload 'cl-geometry)
+(ql:quickload 'smug)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
