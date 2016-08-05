@@ -17,9 +17,10 @@
 ;;(ql:quickload 'ironclad)
 ;;(ql:quickload 'babel)
 (ql:quickload 'cl-svg)
-
+(ql:quickload 'yason)
 (ql:quickload 'cl-geometry)
 (ql:quickload 'smug)
+(ql:quickload 'anaphora)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry

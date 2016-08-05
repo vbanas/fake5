@@ -1,27 +1,18 @@
 (defpackage :src/parser 
-  (:use :common-lisp :src/utils :cl-geometry :smug)
-  (:export #:problem
-           #:parse-problem))
+  (:use :common-lisp :src/utils :src/types :cl-geometry :smug)
+  (:export #:parse-problem))
 
 (in-package :src/parser)
 
-(defclass problem ()
-  ((silhouette :accessor silhouette
-               :initarg :silhouette
-               :initform nil) ;; list of polygons
-   (skeleton :accessor skeleton
-             :initarg :skeleton
-             :initform nil)) ;; list of line-segments
-  )
-
 (defun .newline () (.char= #\NewLine))
 (defun .space () (.char= #\Space))
+(defun .minus () (smug::.make-list 1 :initial-element (.char= #\-)))
 
 (defun .digits ()
   (.plus (.let* ((x (smug::.digit-char-p))
-               (xs (.digits)))
-         (.identity (cons x xs)))
-       (.identity nil)))
+                 (xs (.digits)))
+           (.identity (cons x xs)))
+         (.identity nil)))
 
 (defun .zero-or-more (parser)
   (.plus (.let* ((x parser)
@@ -35,13 +26,18 @@
     (.identity (cons x y))))
 
 (defun .rational ()
-  (.concatenate 'string (.digits) (smug::.make-list 1 :initial-element (.char= #\/)) (.digits)))
+  (.concatenate 'string (.optional (.minus))
+                (.digits)
+                (smug::.make-list 1 :initial-element (.char= #\/))
+                (.digits)))
 
 (defun .pint ()
   (.concatenate 'string (.digits)))
 
+(defun .int () (.concatenate 'string (.optional (.minus)) (.digits)))
+
 (defun .number ()
-  (.first (.or (.rational) (.pint))))
+  (.first (.or (.rational) (.int))))
 
 (defun .point ()
   (.let* ((x (.number))
@@ -65,9 +61,23 @@
                               :end p2))))
 
 (defun .polygon ()
-  (.let* ((_ (.and (.pint) (.newline)))  ; number of vertexes, probably is odd
+  (.let* ((_ (.and (.pint) (.newline))) ; number of vertexes, probably is odd
           (vertexes (.first (.one-or-more (.vertex)))))
-    (.identity (make-polygon-from-point-list vertexes))))
+    (.identity
+     (let* ((p (make-polygon-from-point-list vertexes))
+            (o (or (handler-case (polygon-orientation p)
+                     (error (e) (declare (ignore e)) :error))
+                   0)))
+       (cond
+         ((= o 1) (make-instance 'counterclockwise-polygon
+                                 :point-list (point-list p)
+                                 :edge-list (edge-list p)
+                                 :point-ring (cl-geometry::point-ring p)))
+         ((= o -1) (make-instance 'clockwise-polygon
+                                  :point-list (point-list p)
+                                  :edge-list (edge-list p)
+                                  :point-ring (cl-geometry::point-ring p)))
+         (t p))))))
 
 (defun .silhouette ()
   (.let* ((_ (.and (.pint) (.newline)))  ; number of polygons, probably is odd
