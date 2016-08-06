@@ -8,7 +8,8 @@
            #:mult-tr-matrix
            #:mult-point-matrix
            #:identity-tr-matrix
-           #:translate-matrix))
+           #:translate-matrix
+           #:mult-polygon-matrix))
 
 (in-package :src/matrix)
 
@@ -55,6 +56,11 @@
     (loop for a in matr1 collect
          (loop for b in matr2 collect
               (dot-product a b)))))
+
+(defun mult-polygon-matrix (polygon matr)
+  (make-polygon-from-point-list
+   (loop for point in (point-list polygon) collect
+        (mult-point-matrix point matr))))
 
 (defun mult-point-matrix (point matr)
   (let* ((point-matr (list (list (x point))
