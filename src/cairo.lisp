@@ -1,12 +1,13 @@
 (defpackage :src/cairo
-  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry))
+  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry)
+  (:export #:compute-score-for-polygons))
 
 (in-package :src/cairo)
 
 (defparameter *background-color* (list 1 1 1)) ;; white
 (defparameter *polygon-color* (list 1 0 0)) ;; red
-(defparameter *clockwise-polygon-color* (list 1 1 1)) ;; white
-(defparameter *counterclockwise-polygon-color* (list 0 1 0)) ;; green
+(defparameter *clockwise-polygon-color* *background-color*) 
+(defparameter *counterclockwise-polygon-color* *polygon-color*) 
 
 (defun set-source-color (color)
   (set-source-rgb (first color) (second color) (third color)))
@@ -35,7 +36,15 @@
   (assert (and *x-min* *x-max* *y-min* *y-max*
                *buffer-width* *buffer-height*)))
 
-(defmethod draw-polygon-to-surface ((polygon cl-geometry:polygon))
+(defmethod draw-polygon-to-surface :around ((polygon src/types:clockwise-polygon))
+  (let ((*polygon-color* *clockwise-polygon-color*))
+    (call-next-method)))
+
+(defmethod draw-polygon-to-surface :around ((polygon src/types:counterclockwise-polygon))
+  (let ((*polygon-color* *counterclockwise-polygon-color*))
+    (call-next-method)))
+
+(defmethod draw-polygon-to-surface ((polygon cl-geometry:polygon)) 
   (set-source-color *polygon-color*)
   (set-line-width 1)
   (let ((points (mapcar #'draw-coordinates (cl-geometry:point-list polygon))))
@@ -51,8 +60,7 @@
        (draw-polygon-to-surface p)))
 
 (defun draw-solution-to-surfaces (solution-polygons silhouette-polygons
-                                  &key (dump-to-png (list "/home/ihors/tmp/s.png"
-                                                          "/home/ihors/tmp/p.png")))
+                                  &key (dump-to-png nil))
   (let* ((bounding-box
           (reduce #'src/drawer::bounding-box-union
                   (mapcar #'cl-geometry::construct-bounding-box
@@ -61,9 +69,9 @@
          (*x-max* (cl-geometry::x-max bounding-box))
          (*y-min* (cl-geometry::y-min bounding-box))
          (*y-max* (cl-geometry::y-max bounding-box))
-         (*buffer-height* (* *buffer-width*
-                             (/ (- *y-max* *y-min*)
-                                (- *x-max* *x-min*))))
+         (*buffer-height* (round (* *buffer-width*
+                                    (/ (- *y-max* *y-min*)
+                                       (- *x-max* *x-min*)))))
          )
     ;; (format t "Xmin = ~A~%Xmax = ~A~%Ymin = ~A~%Ymax = ~A~%H = ~A~%"
     ;;         *x-min* *x-max* *y-min* *y-max* *buffer-height*)
@@ -125,4 +133,6 @@
         (compute-score-for-buffers
          (image-surface-get-data s1)
          (image-surface-get-data s2))
-      (/ count-and count-or))))
+      (if (zerop count-or)
+          0
+          (/ count-and count-or)))))
