@@ -6,7 +6,8 @@
         :src/drawer
         :src/polygons
         :src/matrix
-        :src/mcts) 
+        :src/mcts
+        :src/cairo) 
   (:import-from :cl-geometry
                 :point-equal-p)
   (:export :orig-point
@@ -326,6 +327,9 @@
           :documentation "All polygons on the field"
           :accessor field
           :initarg :field)
+   (field-score :type number
+                :accessor field-score
+                :initarg :field-score)
    (adjustment-matrix :type list
                       :documentation "list of lists of values, describes translation of original problem"
                       :accessor adjustment-matrix
@@ -347,11 +351,13 @@
                  :initarg :folding-side)))
 
 (defmethod next-state (_ (st game-state) action)
-  (copy-instance
-   st
-   :field (fold-polygon-list (field st)
-                             (folding-line action)
-                             (folding-side action))))
+  (let ((new-field (fold-polygon-list (field st)
+                                      (folding-line action)
+                                      (folding-side action))))
+    (copy-instance
+     st
+     :field new-field
+     :field-score (get-field-score new-field (target-field st)))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -374,3 +380,20 @@
                   :folding-line line
                   :folding-side direction-point)))))))
 
+(defun get-field-score (field target-field)
+  (compute-score-for-polygons target-field field))
+
+(defmethod estimate-state-reward (g (st game-state))
+  (labels ((%once (st)
+             (let* ((actions (possible-actions g st))
+                    (actions-num (length actions)))
+               (loop for i below actions-num do
+                    (let* ((action (nth (random actions-num) actions))
+                           (next-st (next-state g st action)))
+                      (when (< (field-score st)
+                               (field-score next-st))
+                        (return-from %once next-st))))
+               st)))
+    (loop for i below 10 do
+         (setf st (%once st)))
+    (field-score st)))

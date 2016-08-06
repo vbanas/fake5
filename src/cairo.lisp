@@ -1,5 +1,6 @@
 (defpackage :src/cairo
-  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry))
+  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry)
+  (:export #:compute-score-for-polygons))
 
 (in-package :src/cairo)
 
