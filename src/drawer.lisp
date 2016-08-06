@@ -89,8 +89,8 @@
                                                                   (get-y (y point))))
                                                         points))))
     (if stroke
-        (draw scene (:polygon :points string-points :fill "orange" :stroke stroke))
-        (draw scene (:polygon :points string-points :fill "orange")))))
+        (draw scene (:polygon :points string-points :fill "bisque" :stroke stroke))
+        (draw scene (:polygon :points string-points :fill "bisque")))))
 
 (defun draw-polygons-to-svg (polygons &key (filename "~/polygon.svg"))
   (draw-problem (polygons->problem polygons) :filename filename)
@@ -104,7 +104,7 @@
 
 (defun draw-line-segment (scene line-segment)
   (let ((group
-         (make-group scene (:stroke "white"
+         (make-group scene (:stroke "chocolate"
                                     ;;:fill color :opacity alpha
                                     :stroke-width 1
                                     ;;:fill-opacity (* alpha 0.6)
@@ -140,12 +140,13 @@
         (mapc (lambda (line) (draw-line-segment scene line)) lines)
         (draw-field scene)))))
 
-(defun dump-problems (problem-folder)
-  (mapc (lambda (problem-file)
-          (handler-case
-              (let ((problem (src/parser:parse-problem problem-file))
-                    (svg-filename (format nil "~A.svg" problem-file)))
-                (draw-problem problem :filename svg-filename))
-            (error (e) (format t "~A:~A~%" problem-file e))))
+(defun dump-problems (problem-folder &key (update-fn #'identity))
+  (mapcar (lambda (problem-file)
+            (handler-case
+                (let ((problem (src/parser:parse-problem problem-file))
+                      (svg-filename (format nil "~A.svg" problem-file)))
+                  (draw-problem (funcall update-fn problem) :filename svg-filename)
+                  t)
+              (error (e) (format t "~A:~A~%" problem-file e))))
         (directory problem-folder)))
 

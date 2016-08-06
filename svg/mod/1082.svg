@@ -1,0 +1,85 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="660" height="660" version="1.1" id="toplevel"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <polygon points="186,655 586,355 386,88 386,5 324,5 74,505" fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="386" y1="88" x2="324" y2="5"/>
+    <circle cx="386" cy="88" r="2"/>
+    <circle cx="324" cy="5" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="586" y1="355" x2="386" y2="88"/>
+    <circle cx="586" cy="355" r="2"/>
+    <circle cx="386" cy="88" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="386" y1="88" x2="386" y2="5"/>
+    <circle cx="386" cy="88" r="2"/>
+    <circle cx="386" cy="5" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="386" y1="505" x2="386" y2="88"/>
+    <circle cx="386" cy="505" r="2"/>
+    <circle cx="386" cy="88" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="324" y1="5" x2="386" y2="5"/>
+    <circle cx="324" cy="5" r="2"/>
+    <circle cx="386" cy="5" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="74" y1="505" x2="386" y2="505"/>
+    <circle cx="74" cy="505" r="2"/>
+    <circle cx="386" cy="505" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="186" y1="655" x2="74" y2="505"/>
+    <circle cx="186" cy="655" r="2"/>
+    <circle cx="74" cy="505" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="74" y1="505" x2="324" y2="5"/>
+    <circle cx="74" cy="505" r="2"/>
+    <circle cx="324" cy="5" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="186" y1="655" x2="586" y2="355"/>
+    <circle cx="186" cy="655" r="2"/>
+    <circle cx="586" cy="355" r="2"/>
+  </g>
+  <g stroke="black" stroke-width="1">
+    <line x1="80" y1="80" x2="580" y2="80"/>
+    <line x1="80" y1="80" x2="80" y2="580"/>
+    <line x1="580" y1="580" x2="80" y2="580"/>
+    <line x1="580" y1="580" x2="580" y2="80"/>
+    <line x1="180" y1="77" x2="180" y2="83"/>
+    <line x1="77" y1="180" x2="83" y2="180"/>
+    <line x1="180" y1="577" x2="180" y2="583"/>
+    <line x1="577" y1="180" x2="583" y2="180"/>
+    <line x1="280" y1="77" x2="280" y2="83"/>
+    <line x1="77" y1="280" x2="83" y2="280"/>
+    <line x1="280" y1="577" x2="280" y2="583"/>
+    <line x1="577" y1="280" x2="583" y2="280"/>
+    <line x1="380" y1="77" x2="380" y2="83"/>
+    <line x1="77" y1="380" x2="83" y2="380"/>
+    <line x1="380" y1="577" x2="380" y2="583"/>
+    <line x1="577" y1="380" x2="583" y2="380"/>
+    <line x1="480" y1="77" x2="480" y2="83"/>
+    <line x1="77" y1="480" x2="83" y2="480"/>
+    <line x1="480" y1="577" x2="480" y2="583"/>
+    <line x1="577" y1="480" x2="583" y2="480"/>
+  </g>
+  <g stroke="gray" stroke-width="1" stroke-dasharray="5,5">
+    <line x1="180" y1="80" x2="180" y2="580"/>
+    <line x1="80" y1="180" x2="580" y2="180"/>
+    <line x1="280" y1="80" x2="280" y2="580"/>
+    <line x1="80" y1="280" x2="580" y2="280"/>
+    <line x1="380" y1="80" x2="380" y2="580"/>
+    <line x1="80" y1="380" x2="580" y2="380"/>
+    <line x1="480" y1="80" x2="480" y2="580"/>
+    <line x1="80" y1="480" x2="580" y2="480"/>
+  </g>
+</svg>
