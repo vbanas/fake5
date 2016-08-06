@@ -8,23 +8,41 @@
         :src/polygons
         :src/mcts) 
   (:import-from :cl-geometry
-                :point-equal-p))
+                :point-equal-p)
+  (:export :orig-point
+           :field
+           :adjustment-matrix
+           :target-field))
 
 (in-package :src/simple-state)
+
+(defclass point-with-origin (cl-geometry::point)
+  ((orig-point :initarg :orig-point
+               :accessor orig-point)))
+
+(defun save-origin (point)
+  (make-instance 'point-with-origin
+                 :x (x point)
+                 :y (y point)
+                 :orig-point point))
 
 (defun mirror-point (point line)
   (let* ((c (- (* (B line) (x point)) (* (A line) (y point))))
          (pline (make-instance 'line :a (- (B line)) :b (A line) :c c))
          (ipoint (lines-intersection-point line pline))
-         (mirror-point (make-instance 'point
-                                      :x (- (* 2 (x ipoint)) (x point))
-                                      :y (- (* 2 (y ipoint)) (y point)))))
+         (mirror-point (copy-instance point
+                        :x (- (* 2 (x ipoint)) (x point))
+                        :y (- (* 2 (y ipoint)) (y point)))))
     mirror-point))
 
 (defun test-mirror-point ()
   (labels ((%test (&key a b (c 0)  x y mx my)
              (let* ((l (make-instance 'line :a a :b b :c c))
-                    (p (make-instance 'point :x x :y y))
+                    (p (make-instance 'point-with-origin
+                                      :x x :y y
+                                      :orig-point (make-instance 'point
+                                                                 :x x
+                                                                 :y y)))
                     (m (mirror-point p l)))
                (assert (= (x m) mx))
                (assert (= (y m) my)))))
@@ -51,6 +69,35 @@
        (not (cl-geometry::point-equal-p a c))
        (not (cl-geometry::point-equal-p b c))))
 
+(defun interpolate-coord-helper (start end orig-start orig-end coord)
+  (if (= orig-start orig-end)
+      orig-end
+      (+ orig-start
+         (* (- orig-end orig-start)
+            (/ (- end coord)
+               (- end start))))))
+
+(defun interpolate-coord (start-point end-point orig-start orig-end coord)
+  (if (= (x start-point) (x end-point))
+      (interpolate-coord-helper (y start-point) (y end-point) orig-start orig-end coord)
+      (interpolate-coord-helper (x start-point) (x end-point) orig-start orig-end coord)))
+
+(defun interpolate-origin (start end point)
+  (if (and (typep start 'point-with-origin)
+           (typep end 'point-with-origin))
+      (let* ((orig-start (orig-point start))
+             (orig-end (orig-point end))
+             (orig-x (interpolate-coord start end (x orig-start) (x orig-end) (x point)))
+             (orig-y (interpolate-coord start end (y orig-start) (y orig-end) (y point))))
+        (make-instance 'point-with-origin
+                       :x (x point)
+                       :y (y point)
+                       :orig-point (make-instance 'point :x orig-x :y orig-y)))
+      point))
+
+(defun make-polygon-from-coords-with-origins (&rest coord-list)
+  (make-polygon-from-point-list (mapcar #'save-origin (apply #'coords-to-points coord-list))))
+
 (defun split-polygon (polygon line)
   (let ((points-1 nil)
         (points-2 nil)
@@ -75,7 +122,7 @@
                    (%push (start edge))
                    (unless (or (point-equal-p ipoint (start edge))
                                (point-equal-p ipoint (end edge)))
-                     (%push ipoint)))
+                     (%push (interpolate-origin (start edge) (end edge) ipoint))))
                  (%push (start edge))))))
     (if (or (and points-2
                  (not (= (length points-2) points-on-line))
@@ -102,7 +149,7 @@
 
 (defun test-split-polygon ()
   (labels ((%test (&key a b c coords expected)
-             (let* ((p (apply #'make-polygon-from-coords coords))
+             (let* ((p (apply #'make-polygon-from-coords-with-origins coords))
                     (l (make-instance 'line :a a :b b :c c))
                     (res (split-polygon p l)))
                (assert1 (mapcar #'polygon->list res) expected))))
@@ -145,7 +192,7 @@
 
 (defun fold-polygon-test ()
   (labels ((%test (&key a b c x y coords expected)
-             (let* ((p (apply #'make-polygon-from-coords coords))
+             (let* ((p (apply #'make-polygon-from-coords-with-origins coords))
                     (l (make-instance 'line :a a :b b :c c))
                     (res (fold-polygon
                           p l
@@ -203,7 +250,7 @@
    polygon-list))
 
 (defun fold-quad (fold-specs)
-  (let* ((quad (make-polygon-from-coords 0 0 0 1 1 1 1 0))
+  (let* ((quad (make-polygon-from-coords-with-origins 0 0 0 1 1 1 1 0))
          (result (reduce (lambda (q fold-spec)
                            (destructuring-bind (&key a b (c 0) x y)
                                fold-spec
@@ -284,6 +331,15 @@
                  :documentation "List of polygons describing desired final state"
                  :accessor target-field
                  :initarg :target-field)))
+
+;; (defun inverse-tr-matrix (matr)
+;;   (destructuring-bind ((m00 m01) (m10 m11)) matr
+;;     (let ((det (- (* m00 m11) (* m01 m10))))
+;;       (list (list (/ m11 det) (/ (- m01) det))
+;;             (list (/ (- m10) det) (/ m00 det))))))
+
+;; (defun mult-point-matrix (point matr)
+;;   )
 
 (defmethod clone-state (_ (st game-state))
   st)
