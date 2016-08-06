@@ -407,15 +407,20 @@
                           :defaults log-dir)))
                (draw-polygons-to-svg (field state) :filename file)))))
     (format t "Selected state with score ~,3F~%" (field-score best-state))
-    (with-open-file
-        (*standard-output* (if (= (field-score best-state) 1)
-                               (format nil "~A.good" solution-file)
-                               solution-file)
-                           :direction :output
-                           :if-exists :supersede
-                           :if-does-not-exist :create)
-      (print-solution (field best-state) :matrix (adjustment-matrix state))
-      (field-score best-state))))
+    (let* ((path (pathname solution-file))
+           (name (pathname-name path))
+           (type (pathname-type path))
+           (dir (make-pathname :directory (pathname-directory path)))
+           (filename (if (= (field-score best-state) 1)
+                         (format nil "~A/../maybe_good_solutions/~A.~A" dir name type)
+                         solution-file)))
+      (with-open-file
+          (*standard-output* filename
+                             :direction :output
+                             :if-exists :supersede
+                             :if-does-not-exist :create)
+        (print-solution (field best-state) :matrix (adjustment-matrix state))
+        (field-score best-state)))))
 
 (defmethod clone-state (_ (st game-state))
   st)
