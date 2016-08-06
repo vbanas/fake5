@@ -2,7 +2,8 @@
   (:use :common-lisp
         :cl-geometry
         :src/drawer
-	:src/simple-state))
+	:src/simple-state
+        :src/printer))
 
 (in-package :src/generator)
 
@@ -15,5 +16,6 @@
 	 (new-specs)
 	 (specs-size 10))
     (loop for n from 1 to specs-size do
-	 (push (list :a 1 :b 1 :c (- (/ (random 2) (1+ (random 5)))) :x (random 2) :y (random 2)) new-specs))
-    (src/simple-state::fold-quad-and-show file new-specs :animate t)))
+	 (push (list :a (+ (random 5) 1/100) :b (+ (random 3) 1/100) :c (- (/ (random 2) (1+ (random 5)))) :x (random 2) :y (random 2)) new-specs))
+    (print-solution
+     (src/simple-state::fold-quad-and-show file new-specs :animate t))))
