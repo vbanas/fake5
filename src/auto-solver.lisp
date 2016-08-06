@@ -21,12 +21,15 @@
 
 (defun auto-solve (problem-folder solution-folder)
   (mapcar (lambda (problem-file)
-            (format t "-> ~A: " (pathname-name problem-file))
+            
             (let* ((name (pathname-name problem-file))
-                   (dest (format nil "~A~A.txt" solution-folder name))
-                   (res (src/simple-state::solve problem-file dest :timeout 5)))
-              (terpri)
-              (cons name res)))
+                   (directory (make-pathname :directory
+                                             (pathname-directory problem-file)))
+                   (dest (format nil "~A~A.txt" solution-folder name)))
+              (unless (or (probe-file (format nil "~A../solved-problems/~A.txt" directory name))
+                          (probe-file (format nil "~A../our-problems/~A.txt" directory name)))
+                (format t "~%-> ~A~%" (pathname-name problem-file))
+                (cons name (src/simple-state::solve problem-file dest :timeout 5)))))
           (directory problem-folder)))
 
 ;; (defun dump-res-to-file (res res-file)
