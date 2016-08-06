@@ -82,5 +82,5 @@
       (if (gethash "ok" table)
       	  (format t "problem id:~A hash:~A~%" 
 		  (gethash "problem_id" table)
-		  (gethash "resemblance" table))
+		  (gethash "problem_spec_hash" table))
       	  (format t "FAILED Problem ~A submit~%~A~%" path-to-prob-file (gethash "error" table))))))
