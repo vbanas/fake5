@@ -339,16 +339,23 @@
                  :initarg :target-field)))
 
 (defun read-task-state (filename)
-  (let ((problem (parse-problem filename))
-        (start (make-polygon-from-coords-with-origins 0 0 0 1 1 1 1 0))
-        (id-matrix (identity-tr-matrix)))
+  (let* ((problem (parse-problem filename))
+         (start (make-polygon-from-coords-with-origins 0 0 0 1 1 1 1 0))
+         (bbox (reduce #'src/drawer::bounding-box-union
+                       (mapcar #'cl-geometry::construct-bounding-box
+                               (silhouette problem))))
+         (matrix (translate-matrix (- (cl-geometry::x-min bbox))
+                                   (- (cl-geometry::y-min bbox))))
+         (inv-matrix (inverse-tr-matrix matrix))
+         (silhouette (loop for poly in (silhouette problem) collect
+                          (mult-polygon-matrix poly matrix))))
     (make-instance 'game-state
                    :field (list start)
-                   :adjustment-matrix id-matrix
-                   :target-field (silhouette problem)
+                   :adjustment-matrix inv-matrix
+                   :target-field silhouette
                    :field-score (get-field-score
                                  (list start)
-                                 (silhouette problem)))))
+                                 silhouette))))
 
 (defun solve (problem-file solution-file
                            &key
@@ -381,7 +388,7 @@
                         :direction :output
                         :if-exists :supersede
                         :if-does-not-exist :create)
-     (print-solution (field state)))))
+     (print-solution (field state) :matrix (adjustment-matrix state)))))
 
 (defmethod clone-state (_ (st game-state))
   st)
