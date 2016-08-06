@@ -7,7 +7,8 @@
         :src/polygons
         :src/matrix
         :src/mcts
-        :src/cairo) 
+        :src/cairo 
+        :src/parser) 
   (:import-from :cl-geometry
                 :point-equal-p)
   (:export :orig-point
@@ -338,6 +339,15 @@
                  :documentation "List of polygons describing desired final state"
                  :accessor target-field
                  :initarg :target-field)))
+
+(defun read-task-state (filename)
+  (let ((problem (parse-problem filename))
+        (start (make-polygon-from-coords-with-origins 0 0 0 1 1 1 1 0))
+        (id-matrix (identity-tr-matrix)))
+    (make-instance 'game-state
+                   :field start
+                   :adjustment-matrix id-matrix
+                   :target-field problem)))
 
 (defmethod clone-state (_ (st game-state))
   st)
