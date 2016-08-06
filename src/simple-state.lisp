@@ -8,7 +8,9 @@
         :src/matrix
         :src/mcts
         :src/cairo 
-        :src/parser) 
+        :src/parser
+        :src/printer
+        :src/types)
   (:import-from :cl-geometry
                 :point-equal-p)
   (:export :orig-point
@@ -17,10 +19,6 @@
            :target-field))
 
 (in-package :src/simple-state)
-
-(defclass point-with-origin (cl-geometry::point)
-  ((orig-point :initarg :orig-point
-               :accessor orig-point)))
 
 (defun save-origin (point)
   (make-instance 'point-with-origin
@@ -315,13 +313,13 @@
    (cdr polygons)
    :initial-value (list (car polygons))))
 
-(defun score (polygons target-polygons)
-  (let* ((polygons (union-and-reduce polygons))
-         (intersected-area-ps (intersect-and-reduce (append polygons target-polygons)))
-         (united-area-ps (union-and-reduce (append polygons target-polygons))))
-    (/ (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon intersected-area-ps)))
-       ;; (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon united-area-ps)))
-       1.0)))
+;; (defun score (polygons target-polygons)
+;;   (let* ((polygons (union-and-reduce polygons))
+;;          (intersected-area-ps (intersect-and-reduce (append polygons target-polygons)))
+;;          (united-area-ps (union-and-reduce (append polygons target-polygons))))
+;;     (/ (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon intersected-area-ps)))
+;;        ;; (reduce #'+ (mapcar #'abs (mapcar #'area-simple-polygon united-area-ps)))
+;;        1.0)))
 
 (defclass game-state ()
   ((field :type list
@@ -345,9 +343,39 @@
         (start (make-polygon-from-coords-with-origins 0 0 0 1 1 1 1 0))
         (id-matrix (identity-tr-matrix)))
     (make-instance 'game-state
-                   :field start
+                   :field (list start)
                    :adjustment-matrix id-matrix
-                   :target-field problem)))
+                   :target-field (silhouette problem)
+                   :field-score (get-field-score
+                                 (list start)
+                                 (silhouette problem)))))
+
+(defun solve (problem-file solution-file
+                           &key (iters-count 100) log-dir)
+  (let* ((root-state (read-task-state problem-file))
+         (state root-state)
+         (game :origami-solver)
+         (iteration 0))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration iters-count))
+          do
+          (incf iteration)
+          (let* ((action (select-next-move game state 0.1)))
+            (setf state (next-state game state action))
+            (format t "Iteration ~A score ~,3F~%"
+                    iteration (field-score state))
+            (when log-dir
+              (let ((file (make-pathname
+                           :name (format nil "~A" iteration)
+                           :type "svg"
+                           :defaults log-dir)))
+                (draw-polygons-to-svg (field state) :filename file)))))
+    (with-open-file
+     (*standard-output* solution-file
+                        :direction :output
+                        :if-exists :supersede
+                        :if-does-not-exist :create)
+     (print-solution (field state)))))
 
 (defmethod clone-state (_ (st game-state))
   st)

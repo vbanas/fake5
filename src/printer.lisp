@@ -1,6 +1,6 @@
 (defpackage :src/printer 
   (:use :common-lisp :src/utils :src/types :cl-geometry
-        :src/simple-state)
+        :src/utils)
   (:import-from :alexandria)
   (:export #:print-problem 
            #:print-solution))
