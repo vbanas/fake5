@@ -2,7 +2,6 @@
   (:use :common-lisp 
         :cl-geometry
         :src/drawer
-        :src/polygons
         :src/utils
         :src/drawer
         :src/polygons

@@ -1,5 +1,5 @@
 (defpackage :src/polygons
-  (:use :common-lisp :src/utils :src/types :cl-geometry :anaphora :src/printer)
+  (:use :common-lisp :src/utils :src/types :cl-geometry :anaphora)
   (:export #:reduce-triangles)
   )
 
