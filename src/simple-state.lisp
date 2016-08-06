@@ -12,8 +12,7 @@
         :src/printer
         :src/types)
   (:import-from :cl-geometry
-                :point-equal-p)
-  (:import-from :trivial-timeout)
+                :point-equal-p) 
   (:export :orig-point
            :field
            :adjustment-matrix
