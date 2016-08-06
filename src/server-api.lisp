@@ -78,7 +78,7 @@
 	       (asdf::run-shell-command
 		(format nil "mv ~A ~A/~A.txt" (namestring f) good-folder (pathname-name f)))
 	       (asdf::run-shell-command
-		(format nil "mv ~A/~A ~A/~A.txt" problem-folder (pathname-name f)
+		(format nil "cp ~A/~A ~A/~A.txt" problem-folder (pathname-name f)
 			solved-problem-folder (pathname-name f))))
 	      (:partial
 	       ;;nothing to do
