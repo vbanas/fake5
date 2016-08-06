@@ -140,12 +140,12 @@
         (mapc (lambda (line) (draw-line-segment scene line)) lines)
         (draw-field scene)))))
 
-(defun dump-problems (problem-folder)
+(defun dump-problems (problem-folder &key (update-fn #'identity))
   (mapcar (lambda (problem-file)
             (handler-case
                 (let ((problem (src/parser:parse-problem problem-file))
                       (svg-filename (format nil "~A.svg" problem-file)))
-                  (draw-problem (update-skeleton-with-intersection problem) :filename svg-filename)
+                  (draw-problem (funcall update-fn problem) :filename svg-filename)
                   t)
               (error (e) (format t "~A:~A~%" problem-file e))))
         (directory problem-folder)))
