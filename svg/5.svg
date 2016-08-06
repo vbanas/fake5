@@ -4,23 +4,23 @@
 <svg width="710" height="710" version="1.1" id="toplevel"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
-  <polygon points="405,705 705,305 305,5 5,405" fill="orange"/>
-  <g stroke="darkorange" stroke-width="1">
+  <polygon points="405,705 705,305 305,5 5,405" fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
     <line x1="405" y1="705" x2="705" y2="305"/>
     <circle cx="405" cy="705" r="2"/>
     <circle cx="705" cy="305" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="405" y1="705" x2="5" y2="405"/>
     <circle cx="405" cy="705" r="2"/>
     <circle cx="5" cy="405" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="5" y1="405" x2="305" y2="5"/>
     <circle cx="5" cy="405" r="2"/>
     <circle cx="305" cy="5" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="705" y1="305" x2="305" y2="5"/>
     <circle cx="705" cy="305" r="2"/>
     <circle cx="305" cy="5" r="2"/>

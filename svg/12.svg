@@ -4,38 +4,38 @@
 <svg width="510" height="510" version="1.1" id="toplevel"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
-  <polygon points="5,505 505,505 505,172 172,5 5,5" fill="orange"/>
-  <g stroke="darkorange" stroke-width="1">
+  <polygon points="5,505 505,505 505,172 172,5 5,5" fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
     <line x1="372" y1="272" x2="505" y2="172"/>
     <circle cx="372" cy="272" r="2"/>
     <circle cx="505" cy="172" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="5" y1="505" x2="505" y2="505"/>
     <circle cx="5" cy="505" r="2"/>
     <circle cx="505" cy="505" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="5" y1="505" x2="5" y2="5"/>
     <circle cx="5" cy="505" r="2"/>
     <circle cx="5" cy="5" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="505" y1="505" x2="505" y2="172"/>
     <circle cx="505" cy="505" r="2"/>
     <circle cx="505" cy="172" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="372" y1="272" x2="172" y2="5"/>
     <circle cx="372" cy="272" r="2"/>
     <circle cx="172" cy="5" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="505" y1="172" x2="172" y2="5"/>
     <circle cx="505" cy="172" r="2"/>
     <circle cx="172" cy="5" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="5" y1="5" x2="172" y2="5"/>
     <circle cx="5" cy="5" r="2"/>
     <circle cx="172" cy="5" r="2"/>

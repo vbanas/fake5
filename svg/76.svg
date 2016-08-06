@@ -4,143 +4,143 @@
 <svg width="510" height="510" version="1.1" id="toplevel"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
-  <polygon points="81,497 407,289 497,151 140,13" fill="orange"/>
-  <g stroke="darkorange" stroke-width="1">
+  <polygon points="81,497 407,289 497,151 140,13" fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
     <line x1="470" y1="192" x2="490" y2="148"/>
     <circle cx="470" cy="192" r="2"/>
     <circle cx="490" cy="148" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="407" y1="289" x2="497" y2="151"/>
     <circle cx="407" cy="289" r="2"/>
     <circle cx="497" cy="151" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="489" y1="151" x2="490" y2="148"/>
     <circle cx="489" cy="151" r="2"/>
     <circle cx="490" cy="148" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="405" y1="264" x2="470" y2="192"/>
     <circle cx="405" cy="264" r="2"/>
     <circle cx="470" cy="192" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="407" y1="289" x2="425" y2="174"/>
     <circle cx="407" cy="289" r="2"/>
     <circle cx="425" cy="174" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="173" y1="438" x2="267" y2="62"/>
     <circle cx="173" cy="438" r="2"/>
     <circle cx="267" cy="62" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="81" y1="497" x2="84" y2="490"/>
     <circle cx="81" cy="497" r="2"/>
     <circle cx="84" cy="490" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="81" y1="497" x2="407" y2="289"/>
     <circle cx="81" cy="497" r="2"/>
     <circle cx="407" cy="289" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="84" y1="472" x2="252" y2="109"/>
     <circle cx="84" cy="472" r="2"/>
     <circle cx="252" cy="109" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="255" y1="83" x2="267" y2="62"/>
     <circle cx="255" cy="83" r="2"/>
     <circle cx="267" cy="62" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="81" y1="497" x2="140" y2="13"/>
     <circle cx="81" cy="497" r="2"/>
     <circle cx="140" cy="13" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="89" y1="492" x2="92" y2="422"/>
     <circle cx="89" cy="492" r="2"/>
     <circle cx="92" cy="422" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="88" y1="493" x2="84" y2="472"/>
     <circle cx="88" cy="493" r="2"/>
     <circle cx="84" cy="472" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="89" y1="492" x2="84" y2="490"/>
     <circle cx="89" cy="492" r="2"/>
     <circle cx="84" cy="490" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="88" y1="493" x2="84" y2="490"/>
     <circle cx="88" cy="493" r="2"/>
     <circle cx="84" cy="490" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="92" y1="422" x2="90" y2="422"/>
     <circle cx="92" cy="422" r="2"/>
     <circle cx="90" cy="422" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="173" y1="438" x2="90" y2="422"/>
     <circle cx="173" cy="438" r="2"/>
     <circle cx="90" cy="422" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="143" y1="20" x2="140" y2="13"/>
     <circle cx="143" cy="20" r="2"/>
     <circle cx="140" cy="13" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="425" y1="174" x2="487" y2="147"/>
     <circle cx="425" cy="174" r="2"/>
     <circle cx="487" cy="147" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="489" y1="151" x2="487" y2="147"/>
     <circle cx="489" cy="151" r="2"/>
     <circle cx="487" cy="147" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="139" y1="22" x2="143" y2="20"/>
     <circle cx="139" cy="22" r="2"/>
     <circle cx="143" cy="20" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="489" y1="151" x2="497" y2="151"/>
     <circle cx="489" cy="151" r="2"/>
     <circle cx="497" cy="151" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="405" y1="264" x2="139" y2="22"/>
     <circle cx="405" cy="264" r="2"/>
     <circle cx="139" cy="22" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="461" y1="206" x2="425" y2="174"/>
     <circle cx="461" cy="206" r="2"/>
     <circle cx="425" cy="174" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="461" y1="206" x2="252" y2="109"/>
     <circle cx="461" cy="206" r="2"/>
     <circle cx="252" cy="109" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="139" y1="21" x2="143" y2="20"/>
     <circle cx="139" cy="21" r="2"/>
     <circle cx="143" cy="20" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="255" y1="83" x2="139" y2="21"/>
     <circle cx="255" cy="83" r="2"/>
     <circle cx="139" cy="21" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="497" y1="151" x2="140" y2="13"/>
     <circle cx="497" cy="151" r="2"/>
     <circle cx="140" cy="13" r="2"/>

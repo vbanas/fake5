@@ -5,78 +5,78 @@
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
   <polygon points="436,346 338,242 369,202 307,210 264,164 218,208 157,197 186,238 83,337"
-           fill="orange"/>
-  <g stroke="darkorange" stroke-width="1">
+           fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
     <line x1="259" y1="341" x2="307" y2="210"/>
     <circle cx="259" cy="341" r="2"/>
     <circle cx="307" cy="210" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="259" y1="341" x2="264" y2="164"/>
     <circle cx="259" cy="341" r="2"/>
     <circle cx="264" cy="164" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="259" y1="341" x2="369" y2="202"/>
     <circle cx="259" cy="341" r="2"/>
     <circle cx="369" cy="202" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="348" y1="343" x2="393" y2="300"/>
     <circle cx="348" cy="343" r="2"/>
     <circle cx="393" cy="300" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="259" y1="341" x2="218" y2="208"/>
     <circle cx="259" cy="341" r="2"/>
     <circle cx="218" cy="208" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="171" y1="339" x2="261" y2="253"/>
     <circle cx="171" cy="339" r="2"/>
     <circle cx="261" cy="253" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="83" y1="337" x2="264" y2="164"/>
     <circle cx="83" cy="337" r="2"/>
     <circle cx="264" cy="164" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="259" y1="341" x2="157" y2="197"/>
     <circle cx="259" cy="341" r="2"/>
     <circle cx="157" cy="197" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="171" y1="339" x2="128" y2="294"/>
     <circle cx="171" cy="339" r="2"/>
     <circle cx="128" cy="294" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="348" y1="343" x2="261" y2="253"/>
     <circle cx="348" cy="343" r="2"/>
     <circle cx="261" cy="253" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="436" y1="346" x2="264" y2="164"/>
     <circle cx="436" cy="346" r="2"/>
     <circle cx="264" cy="164" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="436" y1="346" x2="83" y2="337"/>
     <circle cx="436" cy="346" r="2"/>
     <circle cx="83" cy="337" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="393" y1="300" x2="128" y2="294"/>
     <circle cx="393" cy="300" r="2"/>
     <circle cx="128" cy="294" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="307" y1="210" x2="369" y2="202"/>
     <circle cx="307" cy="210" r="2"/>
     <circle cx="369" cy="202" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="218" y1="208" x2="157" y2="197"/>
     <circle cx="218" cy="208" r="2"/>
     <circle cx="157" cy="197" r="2"/>

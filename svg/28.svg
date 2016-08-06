@@ -5,90 +5,90 @@
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
   <polygon points="69,505 148,491 184,419 148,348 69,334 25,375 19,371 18,381 11,388 17,390 11,451"
-           fill="orange"/>
+           fill="bisque"/>
   <polygon points="105,478 54,463 35,413 43,400 44,400 46,395 49,390 48,390 54,375 105,360 148,392 148,446"
-           fill="orange"/>
-  <g stroke="darkorange" stroke-width="1">
+           fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
     <line x1="148" y1="491" x2="184" y2="419"/>
     <circle cx="148" cy="491" r="2"/>
     <circle cx="184" cy="419" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="69" y1="505" x2="184" y2="419"/>
     <circle cx="69" cy="505" r="2"/>
     <circle cx="184" cy="419" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="69" y1="505" x2="148" y2="491"/>
     <circle cx="69" cy="505" r="2"/>
     <circle cx="148" cy="491" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="11" y1="451" x2="19" y2="371"/>
     <circle cx="11" cy="451" r="2"/>
     <circle cx="19" cy="371" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="148" y1="491" x2="148" y2="348"/>
     <circle cx="148" cy="491" r="2"/>
     <circle cx="148" cy="348" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="44" y1="400" x2="69" y2="334"/>
     <circle cx="44" cy="400" r="2"/>
     <circle cx="69" cy="334" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="11" y1="451" x2="49" y2="390"/>
     <circle cx="11" cy="451" r="2"/>
     <circle cx="49" cy="390" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="69" y1="505" x2="19" y2="371"/>
     <circle cx="69" cy="505" r="2"/>
     <circle cx="19" cy="371" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="69" y1="505" x2="11" y2="451"/>
     <circle cx="69" cy="505" r="2"/>
     <circle cx="11" cy="451" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="148" y1="491" x2="11" y2="451"/>
     <circle cx="148" cy="491" r="2"/>
     <circle cx="11" cy="451" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="11" y1="388" x2="69" y2="334"/>
     <circle cx="11" cy="388" r="2"/>
     <circle cx="69" cy="334" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="184" y1="419" x2="148" y2="348"/>
     <circle cx="184" cy="419" r="2"/>
     <circle cx="148" cy="348" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="49" y1="390" x2="19" y2="371"/>
     <circle cx="49" cy="390" r="2"/>
     <circle cx="19" cy="371" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="44" y1="400" x2="11" y2="388"/>
     <circle cx="44" cy="400" r="2"/>
     <circle cx="11" cy="388" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="11" y1="388" x2="148" y2="348"/>
     <circle cx="11" cy="388" r="2"/>
     <circle cx="148" cy="348" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="184" y1="419" x2="69" y2="334"/>
     <circle cx="184" cy="419" r="2"/>
     <circle cx="69" cy="334" r="2"/>
   </g>
-  <g stroke="darkorange" stroke-width="1">
+  <g stroke="chocolate" stroke-width="1">
     <line x1="148" y1="348" x2="69" y2="334"/>
     <circle cx="148" cy="348" r="2"/>
     <circle cx="69" cy="334" r="2"/>
