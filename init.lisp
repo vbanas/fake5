@@ -23,6 +23,7 @@
 (ql:quickload 'anaphora)
 (ql:quickload 'cl-fad)
 (ql:quickload 'cl-cairo2)
+(ql:quickload 'trivial-timeout)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
