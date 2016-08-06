@@ -9,7 +9,8 @@
            #:mult-point-matrix
            #:identity-tr-matrix
            #:translate-matrix
-           #:mult-polygon-matrix))
+           #:mult-polygon-matrix
+           #:rotate-polygon))
 
 (in-package :src/matrix)
 
@@ -70,3 +71,16 @@
     (make-instance 'point
                    :x (car (first res-matr))
                    :y (car (second res-matr)))))
+
+(defun rotation-matrix (m n)
+  (labels ((%sin (m n) (/ (- (* n n) (* m m))
+                          (+ (* n n) (* m m))))
+           (%cos (m n) (/ (* 2 n m)
+                          (+ (* n n) (* m m)))))
+    (list (list (%cos m n) (- (%sin m n)) 0)
+          (list (%sin m n) (%cos m n)     0)
+          (list 0          0              1))))
+
+(defun rotate-polygon (p m n)
+  (let ((matrix (rotation-matrix m n)))
+    (mult-polygon-matrix p matrix)))
