@@ -99,7 +99,16 @@
 (defun make-polygon-from-coords-with-origins (&rest coord-list)
   (make-polygon-from-point-list (mapcar #'save-origin (apply #'coords-to-points coord-list))))
 
+(defparameter *split-polygon-cache* (make-hash-table :test #'equal))
+
 (defun split-polygon (polygon line)
+  (let ((key (list polygon (a line) (b line) (c line))))
+    (or (gethash key *split-polygon-cache*)
+        (let ((result (split-polygon-aux polygon line)))
+          (setf (gethash key *split-polygon-cache*) result)
+          result))))
+
+(defun split-polygon-aux (polygon line)
   (let ((points-1 nil)
         (points-2 nil)
         (points-on-line 0))
@@ -364,6 +373,7 @@
                 (iters-per-move 50)
                 timeout
                 log-dir)
+  (clrhash *split-polygon-cache*)
   (let* ((root-state (read-task-state problem-file))
          (state root-state)
          (best-state state)
