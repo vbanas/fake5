@@ -11,7 +11,7 @@
   (let* ((new-specs)
 	 (specs-size 11))
     (loop for n from 1 to specs-size do
-	 (push (list :a (+ (random 5) 1/100) :b (+ (random 2) 1/100) :c (- (/ (random 2) (1+ (random 3)))) :x (random 2) :y (random 3)) new-specs))
+	 (push (list :a (+ (random 5) 1/100) :b (+ (random 3) 1/100) :c (- (/ (random 7) (1+ (random 3)))) :x (random 2) :y (random 3)) new-specs))
     (labels ((%do ()
                (print-solution
                 (src/simple-state::fold-quad-and-show file new-specs :animate t))))
