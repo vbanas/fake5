@@ -61,12 +61,29 @@
   (with-open-file (foo "/tmp/solution")
     (let ((table (yason::parse foo)))
       (if (gethash "ok" table)
-	  (format t "solution for:~A resemblence:~A~%" problem-id (gethash "resemblance"table))
-	  (format t "FAILED solution for:~A~%~A~%" problem-id (gethash "error" table))
-	))))
+	  (progn
+	    (format t "solution for:~A resemblence:~A~%" problem-id (gethash "resemblance"table))
+	    (if (= 1 (gethash "resemblance" table))
+		:solved
+		:partial))
+	  (progn
+	    (format t "FAILED solution for:~A~%~A~%" problem-id (gethash "error" table))
+	    :failed)))))
 
-(defun submit-all-solutions (folder)
-  (mapc (lambda (f) (submit-solution (pathname-name f) (namestring f)))
+(defun submit-all-solutions (folder good-folder problem-folder solved-problem-folder)
+  (mapc (lambda (f) 
+	  (let ((res (submit-solution (pathname-name f) (namestring f))))
+	    (case res
+	      (:solved ;;move to good_solutions
+	       (asdf::run-shell-command
+		(format nil "mv ~A ~A/~A.txt" (namestring f) good-folder (pathname-name f)))
+	       (asdf::run-shell-command
+		(format nil "mv ~A/~A ~A/~A.txt" problem-folder (pathname-name f)
+			solved-problem-folder (pathname-name f))))
+	      (:partial
+	       ;;nothing to do
+	       )
+	      (:failed))))
 	(cl-fad:list-directory folder)))
 
 ;;1470481200 - 11:00 UTC 6_08_2016
