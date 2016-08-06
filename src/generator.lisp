@@ -21,3 +21,8 @@
                                              :if-does-not-exist :create)
             (%do))
           (%do)))))
+
+(defun generate-many (n folder)
+  (loop for x from 1 to n do
+       (src/generator::generator-test (format nil "~A/~A.svg" folder x)
+				      :res-file (format nil "~A/~A.txt" folder x))))
