@@ -104,7 +104,7 @@
 
 (defun draw-line-segment (scene line-segment)
   (let ((group
-         (make-group scene (:stroke "darkorange"
+         (make-group scene (:stroke "chocolate"
                                     ;;:fill color :opacity alpha
                                     :stroke-width 1
                                     ;;:fill-opacity (* alpha 0.6)
