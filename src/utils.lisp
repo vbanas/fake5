@@ -82,3 +82,10 @@
       (if (funcall test x head)
           (values (reverse (cons head acc)) (cdr lst))
           (split-list-at x (cdr lst) :acc (cons head acc))))))
+
+;; (defun get-region-color (region)
+;;   (or (gethash region *region-color-ht*)
+;;       (let* ((rs (make-random-state t))
+;;              (color (format nil "#~x~x~x" (+ 127 (random 128 rs)) (+ 127 (random 128 rs)) (+ 127 (random 128 rs)))))
+;;         (setf (gethash region *region-color-ht*) color)
+;;         color)))

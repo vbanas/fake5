@@ -56,11 +56,31 @@
 (defun submit-solution (problem-id path-to-sol-file)
   (sleep 1)
   (asdf::run-shell-command 
-   (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit'"
-	   (get-team-key) problem-id path-to-sol-file)))
+   (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit' > /tmp/solution"
+	   (get-team-key) problem-id path-to-sol-file))
+  (with-open-file (foo "/tmp/solution")
+    (let ((table (yason::parse foo)))
+      (if (gethash "ok" table)
+	  (format t "solution for:~A resemblence:~A~%" problem-id (gethash "resemblance"table))
+	  (format t "FAILED solution for:~A~%~A~%" problem-id (gethash "error" table))
+	))))
 
 (defun submit-all-solutions (folder)
   (mapc (lambda (f) (submit-solution (pathname-name f) (namestring f)))
 	(cl-fad:list-directory folder)))
 
+;;1470481200 - 11:00 UTC 6_08_2016
+;;1470484800 - 12:00 UTC
 
+(defun submit-problem (path-to-prob-file timestamp)
+  (sleep 1)
+  (asdf::run-shell-command 
+   (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'solution_spec=@~A' -F 'publish_time=~A' 'http://2016sv.icfpcontest.org/api/problem/submit' > /tmp/problem"
+	   (get-team-key) path-to-prob-file timestamp))
+  (with-open-file (foo "/tmp/problem")
+    (let ((table (yason::parse foo)))
+      (if (gethash "ok" table)
+      	  (format t "problem id:~A hash:~A~%" 
+		  (gethash "problem_id" table)
+		  (gethash "resemblance" table))
+      	  (format t "FAILED Problem ~A submit~%~A~%" path-to-prob-file (gethash "error" table))))))
