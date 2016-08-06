@@ -43,16 +43,13 @@
 (defvar *exploration-coefficient*)
 (defvar *game*)
 
-(defun select-next-move (game initial-state timeout-in-seconds
+(defun select-next-move (game initial-state max-iters
                          &key
                            (exploration-coefficient 1))
-  (let* ((stop-time (+ (get-internal-run-time)
-                       (* timeout-in-seconds
-                          internal-time-units-per-second)))
-         (*game* game)
+  (let* ((*game* game)
          (*exploration-coefficient* exploration-coefficient)
          (root (make-node-for-state initial-state)))
-    (loop while (< (get-internal-run-time) stop-time)
+    (loop for i below max-iters
        do
          (multiple-value-bind (node state)
              (find-best-nested-child

@@ -351,7 +351,10 @@
                                  (silhouette problem)))))
 
 (defun solve (problem-file solution-file
-                           &key (iters-count 100) log-dir)
+                           &key
+                           (iters-count 100)
+                           (iters-per-move 50)
+                           log-dir)
   (let* ((root-state (read-task-state problem-file))
          (state root-state)
          (game :origami-solver)
@@ -360,7 +363,7 @@
                      (< iteration iters-count))
           do
           (incf iteration)
-          (let* ((action (select-next-move game state 0.1)))
+          (let* ((action (select-next-move game state iters-per-move)))
             (setf state (next-state game state action))
             (format t "Iteration ~A score ~,3F~%"
                     iteration (field-score state))
@@ -388,6 +391,10 @@
                  :type point
                  :initarg :folding-side)))
 
+(defmethod print-object ((a action) stream)
+  (format t "(action: line ~A side ~A)"
+          (folding-line a) (folding-side a)))
+
 (defmethod next-state (_ (st game-state) action)
   (let ((new-field (fold-polygon-list (field st)
                                       (folding-line action)
@@ -405,18 +412,28 @@
           (values pt pt-sign)))))
   nil)
 
+(defun valid-move? (field line)
+  (loop for polygon in field do
+        (when (cdr (split-polygon polygon line))
+          (return-from valid-move? t)))
+  nil)
+
 (defmethod possible-actions (_ (st game-state))
-  (loop for polygon in (target-field st) append
-       (loop for edge in (edge-list polygon) append
-            (let* ((line (line-from-segment edge))
-                   (direction-point
-                    (find-non-collinear-point line polygon)))
-              (when direction-point
-                (list
-                 (make-instance
-                  'action
-                  :folding-line line
-                  :folding-side direction-point)))))))
+  (let ((l
+         (loop for polygon in (target-field st) append
+               (loop for edge in (edge-list polygon) append
+                     (let* ((line (line-from-segment edge))
+                            (direction-point
+                             (find-non-collinear-point line polygon)))
+                       (when (and direction-point
+                                  (valid-move? (field st) line))
+                         (list
+                          (make-instance
+                           'action
+                           :folding-line line
+                           :folding-side direction-point))))))))
+    ;;(format t ">> possible-actions: ~A~%" l)
+    l))
 
 (defun get-field-score (field target-field)
   (compute-score-for-polygons target-field field))
@@ -433,5 +450,8 @@
                         (return-from %once next-st))))
                st)))
     (loop for i below 10 do
-         (setf st (%once st)))
+          (setf st (%once st)))
+    ;; (format t "estimate-state-reward:~%")
+    ;; (format t "field: ~A~%" (mapcar #'polygon->list (field st)))
+    ;; (format t "score: ~A~%" (field-score st))
     (field-score st)))
