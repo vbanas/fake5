@@ -22,6 +22,7 @@
 (ql:quickload 'smug)
 (ql:quickload 'anaphora)
 (ql:quickload 'cl-fad)
+(ql:quickload 'cl-cairo2)
 
 (in-package :cl-user)
 (asdf:initialize-source-registry '(:source-registry
