@@ -12,13 +12,13 @@
 (defun set-source-color (color)
   (set-source-rgb (first color) (second color) (third color)))
 
-(defparameter *scale* 100)
+(defparameter *scale* 50)
 
 (defparameter *x-min* nil)
 (defparameter *x-max* nil)
 (defparameter *y-min* nil)
 (defparameter *y-max* nil)
-(defparameter *buffer-width* 100)
+(defparameter *buffer-width* *scale*)
 (defparameter *buffer-height* nil)
 
 
