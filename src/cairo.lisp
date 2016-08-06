@@ -12,7 +12,7 @@
 (defun set-source-color (color)
   (set-source-rgb (first color) (second color) (third color)))
 
-(defparameter *scale* 50)
+(defparameter *scale* 64)
 
 (defparameter *x-min* nil)
 (defparameter *x-max* nil)
@@ -23,11 +23,13 @@
 
 
 (defun draw-coordinates (point)
-  (let ((res (cons (round (* *scale* (/ (- (cl-geometry:x point) *x-min*)
-                                        (- *x-max* *x-min*))))
-                   (round (* *scale* (/ (- (cl-geometry:y point) *y-min*)
-                                        (- *y-max* *y-min*)))))))
-     ;; (format t "~A ~A -> ~A~%" (cl-geometry:x point) (cl-geometry:y point) res)
+  (let ((res (cons (round (* *buffer-width* (/ (- (cl-geometry:x point) *x-min*)
+                                               (- *x-max* *x-min*))))
+                   (round (- *buffer-height*
+                           (* *buffer-height*
+                              (/ (- (cl-geometry:y point) *y-min*)
+                                 (- *y-max* *y-min*))))))))
+    ;; (format t "~A ~A -> ~A~%" (cl-geometry:x point) (cl-geometry:y point) res)
     res))
 
 (defgeneric draw-polygon-to-surface (polygon))
