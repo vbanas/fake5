@@ -28,7 +28,7 @@
               (unless (or (probe-file (format nil "~A../solved-problems/~A.txt" directory name))
                           (probe-file (format nil "~A../our-problems/~A.txt" directory name)))
                 (format t "~%-> ~A~%" (pathname-name problem-file))
-                (cons name (src/simple-state::solve problem-file dest :timeout 5)))))
+                (cons name (src/simple-state::solve problem-file dest :timeout 10 :iters-count 200 :iters-per-move 100)))))
           (directory problem-folder)))
 
 ;; (defun dump-res-to-file (res res-file)
