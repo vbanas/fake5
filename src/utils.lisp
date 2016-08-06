@@ -1,7 +1,8 @@
 (defpackage :src/utils
   (:use :common-lisp :cl-geometry :src/types)
   (:export #:copy-instance)
-  (:export #:polygons->problem))
+  (:export #:polygons->problem
+           #:split-list-at))
 
 (in-package :src/utils)
 ;; Taken from
@@ -33,3 +34,10 @@
     (make-instance 'problem
                    :silhouette polygons
                    :skeleton lines)))
+
+(defun split-list-at (x lst &key (test #'equal) acc)
+  (when lst
+    (let ((head (car lst)))
+      (if (funcall test x head)
+          (values (reverse (cons head acc)) (cdr lst))
+          (split-list-at x (cdr lst) :acc (cons head acc))))))

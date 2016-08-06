@@ -6,6 +6,7 @@
 	       :src/main :src/drawer 
 	       :src/parser :src/types
 	       :src/server-api :src/printer
+           :src/polygons
 	       :src/simple-state :src/generator
 	       )
   :in-order-to ((test-op (load-op :src/test/field
