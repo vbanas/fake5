@@ -5,6 +5,7 @@
         :src/utils
         :src/drawer
         :src/polygons
+        :src/matrix
         :src/mcts) 
   (:import-from :cl-geometry
                 :point-equal-p)
@@ -73,21 +74,21 @@
       orig-end
       (+ orig-start
          (* (- orig-end orig-start)
-            (/ (- end coord)
+            (/ (- coord start)
                (- end start))))))
 
-(defun interpolate-coord (start-point end-point orig-start orig-end coord)
+(defun interpolate-coord (start-point end-point orig-start orig-end point)
   (if (= (x start-point) (x end-point))
-      (interpolate-coord-helper (y start-point) (y end-point) orig-start orig-end coord)
-      (interpolate-coord-helper (x start-point) (x end-point) orig-start orig-end coord)))
+      (interpolate-coord-helper (y start-point) (y end-point) orig-start orig-end (y point))
+      (interpolate-coord-helper (x start-point) (x end-point) orig-start orig-end (x point))))
 
 (defun interpolate-origin (start end point)
   (if (and (typep start 'point-with-origin)
            (typep end 'point-with-origin))
       (let* ((orig-start (orig-point start))
              (orig-end (orig-point end))
-             (orig-x (interpolate-coord start end (x orig-start) (x orig-end) (x point)))
-             (orig-y (interpolate-coord start end (y orig-start) (y orig-end) (y point))))
+             (orig-x (interpolate-coord start end (x orig-start) (x orig-end) point))
+             (orig-y (interpolate-coord start end (y orig-start) (y orig-end) point)))
         (make-instance 'point-with-origin
                        :x (x point)
                        :y (y point)
@@ -333,15 +334,6 @@
                  :documentation "List of polygons describing desired final state"
                  :accessor target-field
                  :initarg :target-field)))
-
-;; (defun inverse-tr-matrix (matr)
-;;   (destructuring-bind ((m00 m01) (m10 m11)) matr
-;;     (let ((det (- (* m00 m11) (* m01 m10))))
-;;       (list (list (/ m11 det) (/ (- m01) det))
-;;             (list (/ (- m10) det) (/ m00 det))))))
-
-;; (defun mult-point-matrix (point matr)
-;;   )
 
 (defmethod clone-state (_ (st game-state))
   st)
