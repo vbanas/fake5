@@ -10,7 +10,8 @@
            #:identity-tr-matrix
            #:translate-matrix
            #:mult-polygon-matrix
-           #:rotate-polygon))
+           #:rotate-polygon
+           #:rotate-point))
 
 (in-package :src/matrix)
 
@@ -84,3 +85,8 @@
 (defun rotate-polygon (p m n)
   (let ((matrix (rotation-matrix m n)))
     (mult-polygon-matrix p matrix)))
+
+(defun rotate-point (p m n)
+  (let ((matrix (rotation-matrix m n)))
+    (mult-point-matrix p matrix)))
+
