@@ -379,34 +379,27 @@
          (best-state state)
          (game :origami-solver)
          (iteration 0))
-    (labels ((%do ()
-               (loop while (and (< (field-score state) 1)
-                                (< iteration iters-count))
-                  do
-                    (incf iteration)
-                    (let* ((action (select-next-move game state iters-per-move)))
-                      (when (null action)
-                        (format t "No more actions found")
-                        (return))
-                      (setf state (next-state game state action))
-                      (when (> (field-score state)
-                               (field-score best-state))
-                        (setf best-state state))
-                      (format t "Iteration ~A score ~,3F~%"
-                              iteration (field-score state))
-                      (when log-dir
-                        (let ((file (make-pathname
-                                     :name (format nil "~A" iteration)
-                                     :type "svg"
-                                     :defaults log-dir)))
-                          (draw-polygons-to-svg (field state) :filename file)))))))
-      (if timeout
-          (handler-case
-              (trivial-timeout:with-timeout (timeout)
-                (%do))
-            (trivial-timeout:timeout-error ()
-              ))
-          (%do)))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration iters-count))
+       do
+         (incf iteration)
+         (let* ((action (select-next-move game state iters-per-move
+                                          :timeout-in-seconds (when timeout (/ timeout iters-count)))))
+           (when (null action)
+             (format t "No more actions found")
+             (return))
+           (setf state (next-state game state action))
+           (when (> (field-score state)
+                    (field-score best-state))
+             (setf best-state state))
+           (format t "Iteration ~A score ~,3F~%"
+                   iteration (field-score state))
+           (when log-dir
+             (let ((file (make-pathname
+                          :name (format nil "~A" iteration)
+                          :type "svg"
+                          :defaults log-dir)))
+               (draw-polygons-to-svg (field state) :filename file)))))
     (format t "Selected state with score ~,3F~%" (field-score best-state))
     (with-open-file
         (*standard-output* (if (= (field-score best-state) 1)
