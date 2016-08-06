@@ -73,6 +73,14 @@
                    :x (car (first res-matr))
                    :y (car (second res-matr)))))
 
+(defun move-polygon (polygon dx dy)
+  (let ((m (translate-matrix dx dy)))
+    (mult-polygon-matrix polygon m)))
+
+(defun move-point (point dx dy)
+  (let ((m (translate-matrix dx dy)))
+    (mult-point-matrix point m)))
+
 (defun rotation-matrix (m n)
   (labels ((%sin (m n) (/ (- (* n n) (* m m))
                           (+ (* n n) (* m m))))
@@ -82,11 +90,29 @@
           (list (%sin m n) (%cos m n)     0)
           (list 0          0              1))))
 
-(defun rotate-polygon (p m n)
+(defun rotate-polygon (p m n &key around)
   (let ((matrix (rotation-matrix m n)))
-    (mult-polygon-matrix p matrix)))
+    (if around
+        (move-polygon
+         (mult-polygon-matrix
+          (move-polygon p
+                        (- (cl-geometry:x around))
+                        (- (cl-geometry:y around)))
+          matrix)
+         (cl-geometry:x around)
+         (cl-geometry:y around))
+        (mult-polygon-matrix p matrix))))
 
-(defun rotate-point (p m n)
+(defun rotate-point (p m n &key around)
   (let ((matrix (rotation-matrix m n)))
-    (mult-point-matrix p matrix)))
+    (if around
+        (move-point
+         (mult-point-matrix
+          (move-point p
+                      (- (cl-geometry:x around))
+                      (- (cl-geometry:y around)))
+          matrix)
+         (cl-geometry:x around)
+         (cl-geometry:y around))
+        (mult-point-matrix p matrix))))
 
