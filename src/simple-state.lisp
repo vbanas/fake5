@@ -497,3 +497,52 @@
     ;; (format t "field: ~A~%" (mapcar #'polygon->list (field st)))
     ;; (format t "score: ~A~%" (field-score st))
     (field-score st)))
+
+(defun detect-right-angles (polygon-list)
+  (let ((edge-pairs nil))
+    (dolist (p polygon-list)
+      (let ((first-edge (car (edge-list p))))
+        (loop for (e1 e2) on (edge-list p) do
+             (let ((e2 (or e2 first-edge)))
+               (let ((v1 (vec-from-edge e1))
+                     (v2 (vec-from-edge e2)))
+                 (when (= 0 (vec-product v1 v2))
+                   (push (cons e1 e2) edge-pairs)))))))
+    edge-pairs))
+
+(defun vec-from-edge (edge)
+  (make-vec (start edge) (end edge)))
+
+(defun make-vec (a b)
+  (make-instance 'point
+                 :x (- (x b) (x a))
+                 :y (- (y b) (y a))))
+
+(defun vec-product (a b)
+  (+ (* (x a) (x b))
+     (* (y a) (y b))))
+
+(defun edge->list (edge)
+  (append (point->list (start edge))
+          (point->list (end edge))))
+
+(defun test-detect-right-angles ()
+  (labels ((%test (&key coords expected)
+             (let* ((pl (mapcar
+                         (lambda (x)
+                           (apply #'make-polygon-from-coords x))
+                         coords))
+                    (result (detect-right-angles pl))
+                    (result-1 (mapcar
+                               (lambda (pair)
+                                 (list (edge->list (car pair))
+                                       (edge->list (cdr pair))))
+                               result)))
+               (assert1 result-1 expected))))
+    (%test :coords '((0 0 0 1 1 0))
+           :expected '(((1 0 0 0) (0 0 0 1))))
+    (%test :coords '((0 0 0 1 1 0)
+                     (0 1 2 1 1 0))
+           :expected '(((2 1 1 0) (1 0 0 1))
+                       ((1 0 0 0) (0 0 0 1))))
+    t))
