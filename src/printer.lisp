@@ -1,6 +1,7 @@
 (defpackage :src/printer 
   (:use :common-lisp :src/utils :src/types :cl-geometry
-        :src/simple-state)
+        :src/simple-state
+        :src/matrix)
   (:import-from :alexandria)
   (:export #:print-problem 
            #:print-solution))
@@ -36,7 +37,7 @@
           (print-silhouette (silhouette p))
           (print-skeleton (skeleton p))))
 
-(defun print-solution (field)
+(defun print-solution (field &key matrix)
   (let ((origins (make-hash-table :test #'equalp))
         (orig-ind -1))
     (labels ((%add-origin (point)
@@ -77,4 +78,7 @@
       ;; TODO: matrix operations
       (let ((lst (%sorted-origins (alexandria:compose #'cdr #'cdr))))
         (loop for point in lst do
-             (format t "~A,~A~%" (x point) (y point)))))))
+             (let ((point (if matrix
+                              (mult-point-matrix point matrix)
+                              point)))
+               (format t "~A,~A~%" (x point) (y point))))))))
