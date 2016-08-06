@@ -57,7 +57,12 @@
             ))))
 
 (defmacro with-calculated-size ((polygons) &body body)
-  `(let* ((bounding-box (reduce #'bounding-box-union (mapcar #'cl-geometry::construct-bounding-box ,polygons)))
+  `(let* ((bounding-box (or (reduce #'bounding-box-union (mapcar #'cl-geometry::construct-bounding-box ,polygons))
+                            (make-instance 'cl-geometry::bounding-box
+                                           :x-min 0
+                                           :y-min 0
+                                           :x-max 1
+                                           :y-max 1)))
           (x-min (cl-geometry::x-min bounding-box))
           (x-max (cl-geometry::x-max bounding-box))
           (y-min (cl-geometry::y-min bounding-box))
@@ -118,16 +123,15 @@
     (draw group (:circle :cx (get-x (x (end line-segment))) :cy (get-y (y (end line-segment))) :r 2))))
 
 (defun bounding-box-union (box1 box2)
-  (when (cl-geometry::bounding-boxes-intersect-p box1 box2)
-    (make-instance 'cl-geometry::bounding-box
-                   :x-min (min (cl-geometry::x-min box1)
-                               (cl-geometry::x-min box2))
-                   :x-max (max (cl-geometry::x-max box1)
-                               (cl-geometry::x-max box2))
-                   :y-min (min (cl-geometry::y-min box1)
-                               (cl-geometry::y-min box2))
-                   :y-max (max (cl-geometry::y-max box1)
-                               (cl-geometry::y-max box2)))))
+  (make-instance 'cl-geometry::bounding-box
+                 :x-min (min (cl-geometry::x-min box1)
+                             (cl-geometry::x-min box2))
+                 :x-max (max (cl-geometry::x-max box1)
+                             (cl-geometry::x-max box2))
+                 :y-min (min (cl-geometry::y-min box1)
+                             (cl-geometry::y-min box2))
+                 :y-max (max (cl-geometry::y-max box1)
+                             (cl-geometry::y-max box2))))
 
 (defun draw-problem (problem &key (filename "~/field.svg"))
   (let* ((polygons (src/types:silhouette problem))
