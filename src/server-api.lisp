@@ -54,7 +54,7 @@
     snapshot-blob))
 
 (defun submit-solution (problem-id path-to-sol-file)
-  (sleep 1)
+  (sleep 0.5)
   (asdf::run-shell-command 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit' > /tmp/solution"
 	   (get-team-key) problem-id path-to-sol-file))
