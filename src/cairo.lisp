@@ -22,11 +22,11 @@
 
 
 (defun draw-coordinates (point)
-  (let ((res (cons (* *scale* (/ (- (cl-geometry:x point) *x-min*)
-                                 (- *x-max* *x-min*)))
-                   (* *scale* (/ (- (cl-geometry:y point) *y-min*)
-                                 (- *y-max* *y-min*))))))
-    (format t "~A~%" res)
+  (let ((res (cons (round (* *scale* (/ (- (cl-geometry:x point) *x-min*)
+                                        (- *x-max* *x-min*))))
+                   (round (* *scale* (/ (- (cl-geometry:y point) *y-min*)
+                                        (- *y-max* *y-min*)))))))
+     ;; (format t "~A ~A -> ~A~%" (cl-geometry:x point) (cl-geometry:y point) res)
     res))
 
 (defgeneric draw-polygon-to-surface (polygon))
@@ -65,15 +65,64 @@
                              (/ (- *y-max* *y-min*)
                                 (- *x-max* *x-min*))))
          )
-    (format t "Xmin = ~A~%Xmax = ~A~%Ymin = ~A~%Ymax = ~A~%H = ~A~%"
-            *x-min* *x-max* *y-min* *y-max* *buffer-height*)
-    ;; solution
-    (let* ((surface (create-image-surface :rgb24 *buffer-width* *buffer-height*))
-           (cl-cairo2::*context* (create-context surface)))
-      (progn (set-source-color *background-color*)
-             (paint)
-             (draw-polygons-to-surface solution-polygons))
-      (when dump-to-png
-        (surface-write-to-png surface (car dump-to-png))))
-    ))
+    ;; (format t "Xmin = ~A~%Xmax = ~A~%Ymin = ~A~%Ymax = ~A~%H = ~A~%"
+    ;;         *x-min* *x-max* *y-min* *y-max* *buffer-height*)
+    (values
+     ;; solution
+     (let* ((surface (create-image-surface :rgb24 *buffer-width* *buffer-height*))
+            (cl-cairo2::*context* (create-context surface)))
+       (progn (cairo:set-antialias :none)
+              (set-source-color *background-color*)
+              (paint)
+              (draw-polygons-to-surface solution-polygons))
+       (when dump-to-png
+         (surface-write-to-png surface (first dump-to-png)))
+       surface)
+     
+     ;; silhouette
+     (let* ((surface (create-image-surface :rgb24 *buffer-width* *buffer-height*))
+            (cl-cairo2::*context* (create-context surface))
+            ;; (*polygon-color* (list 0 1 0))
+            ;; green
+            )
+       (progn (cairo:set-antialias :none)
+              (set-source-color *background-color*)
+              (paint)
+              (draw-polygons-to-surface silhouette-polygons))
+       (when dump-to-png
+         (surface-write-to-png surface (second dump-to-png)))
+       surface))))
 
+(defun compute-score-for-buffers (buffer1 buffer2)
+  (let ((c1 nil) (c2 nil)
+        (count-and 0)
+        (count-or 0)
+        (white (list 255 255 255 255)))
+    (loop for x across buffer1
+       for y across buffer2 do
+       ;; (format t "~A ~A~%" c1 c2)
+         (push x c1) (push y c2)
+         (when (and (= (length c1) 4)
+                    (= (length c2) 4)) 
+           ;; (format t "c1 = ~A; c2 = ~A;~%" c1 c2)
+           (cond ((and (equal c1 c2)
+                       (not (equal c1 white)))
+                  (incf count-and)
+                  (incf count-or))
+                 ((or (and (equal c1 white)
+                           (not (equal c2 white)))
+                      (and (equal c2 white)
+                           (not (equal c1 white))))
+                  (incf count-or))
+                 (t nil))
+           (setf c1 nil) (setf c2 nil)))
+    (values count-and count-or)))
+
+(defun compute-score-for-polygons (ps1 ps2)
+  (multiple-value-bind (s1 s2)
+      (draw-solution-to-surfaces ps1 ps2)
+    (multiple-value-bind (count-and count-or)
+        (compute-score-for-buffers
+         (image-surface-get-data s1)
+         (image-surface-get-data s2))
+      (/ count-and count-or))))
