@@ -1,5 +1,5 @@
 (defpackage :src/server-api
-  (:use :common-lisp :anaphora))
+  (:use :common-lisp :anaphora :cl-fad))
 
 (in-package :src/server-api)
 
@@ -53,8 +53,14 @@
     	  problems)
     snapshot-blob))
 
-(defun submit-solution ()
-  
-  )
+(defun submit-solution (problem-id path-to-sol-file)
+  (sleep 1)
+  (asdf::run-shell-command 
+   (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit'"
+	   (get-team-key) problem-id path-to-sol-file)))
+
+(defun submit-all-solutions (folder)
+  (mapc (lambda (f) (submit-solution (pathname-name f) (namestring f)))
+	(cl-fad:list-directory folder)))
 
 

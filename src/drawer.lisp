@@ -89,8 +89,8 @@
                                                                   (get-y (y point))))
                                                         points))))
     (if stroke
-        (draw scene (:polygon :points string-points :fill "orange" :stroke stroke))
-        (draw scene (:polygon :points string-points :fill "orange")))))
+        (draw scene (:polygon :points string-points :fill "bisque" :stroke stroke))
+        (draw scene (:polygon :points string-points :fill "bisque")))))
 
 (defun draw-polygons-to-svg (polygons &key (filename "~/polygon.svg"))
   (draw-problem (polygons->problem polygons) :filename filename)

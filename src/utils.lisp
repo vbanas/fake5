@@ -1,8 +1,13 @@
 (defpackage :src/utils
   (:use :common-lisp :cl-geometry :src/types :cl-containers :anaphora)
   (:export #:copy-instance)
+<<<<<<< HEAD
   (:export #:polygons->problem)
   (:export #:update-skeleton-with-intersection))
+=======
+  (:export #:polygons->problem
+           #:split-list-at))
+>>>>>>> 4852c0e3cac9c32309109fb21a317238b2c82f39
 
 (in-package :src/utils)
 ;; Taken from
@@ -35,6 +40,7 @@
                    :silhouette polygons
                    :skeleton lines)))
 
+<<<<<<< HEAD
 (defun update-skeleton-with-intersection (problem)
   (let ((lines)
         (queue (make-instance 'basic-queue)))
@@ -74,3 +80,11 @@
 ;;        do (let ((first (first-element)))
 ;;             (delete-first queue)
 ;;             ()))))
+=======
+(defun split-list-at (x lst &key (test #'equal) acc)
+  (when lst
+    (let ((head (car lst)))
+      (if (funcall test x head)
+          (values (reverse (cons head acc)) (cdr lst))
+          (split-list-at x (cdr lst) :acc (cons head acc))))))
+>>>>>>> 4852c0e3cac9c32309109fb21a317238b2c82f39
