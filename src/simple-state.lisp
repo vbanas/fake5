@@ -382,10 +382,10 @@
 
 (defclass action ()
   ((folding-line :accessor folding-line
-                 :type 'line
+                 :type line
                  :initarg :folding-line)
    (folding-side :accessor folding-side
-                 :type 'point
+                 :type point
                  :initarg :folding-side)))
 
 (defmethod next-state (_ (st game-state) action)
