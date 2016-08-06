@@ -364,6 +364,9 @@
           do
           (incf iteration)
           (let* ((action (select-next-move game state iters-per-move)))
+            (when (null action)
+              (format t "No more actions found")
+              (return))
             (setf state (next-state game state action))
             (format t "Iteration ~A score ~,3F~%"
                     iteration (field-score state))
