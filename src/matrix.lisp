@@ -6,9 +6,13 @@
   (:export #:inverse-tr-matrix
            #:transpose-tr-matrix
            #:mult-tr-matrix
-           #:mult-point-matrix))
+           #:mult-point-matrix
+           #:identity-tr-matrix))
 
 (in-package :src/matrix)
+
+(defun identity-tr-matrix ()
+  '((1 0 0) (0 1 0) (0 0 1)))
 
 (defun inverse-tr-matrix (matr)
   (destructuring-bind ((m00 m01 m02) (m10 m11 m12) (m20 m21 m22)) matr
