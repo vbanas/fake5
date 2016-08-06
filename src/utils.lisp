@@ -3,7 +3,9 @@
   (:export #:copy-instance)
   (:export #:update-skeleton-with-intersection)
   (:export #:polygons->problem
-           #:split-list-at))
+           #:split-list-at
+           #:point-with-origin
+           #:orig-point))
 
 (in-package :src/utils)
 ;; Taken from
@@ -89,3 +91,7 @@
 ;;              (color (format nil "#~x~x~x" (+ 127 (random 128 rs)) (+ 127 (random 128 rs)) (+ 127 (random 128 rs)))))
 ;;         (setf (gethash region *region-color-ht*) color)
 ;;         color)))
+
+(defclass point-with-origin (cl-geometry::point)
+  ((orig-point :initarg :orig-point
+               :accessor orig-point)))

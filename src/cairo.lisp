@@ -1,5 +1,6 @@
 (defpackage :src/cairo
-  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry))
+  (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry)
+  (:export #:compute-score-for-polygons))
 
 (in-package :src/cairo)
 
@@ -59,8 +60,7 @@
        (draw-polygon-to-surface p)))
 
 (defun draw-solution-to-surfaces (solution-polygons silhouette-polygons
-                                  &key (dump-to-png (list "/home/ihors/tmp/s.png"
-                                                          "/home/ihors/tmp/p.png")))
+                                  &key (dump-to-png nil))
   (let* ((bounding-box
           (reduce #'src/drawer::bounding-box-union
                   (mapcar #'cl-geometry::construct-bounding-box
@@ -69,9 +69,9 @@
          (*x-max* (cl-geometry::x-max bounding-box))
          (*y-min* (cl-geometry::y-min bounding-box))
          (*y-max* (cl-geometry::y-max bounding-box))
-         (*buffer-height* (* *buffer-width*
-                             (/ (- *y-max* *y-min*)
-                                (- *x-max* *x-min*))))
+         (*buffer-height* (round (* *buffer-width*
+                                    (/ (- *y-max* *y-min*)
+                                       (- *x-max* *x-min*)))))
          )
     ;; (format t "Xmin = ~A~%Xmax = ~A~%Ymin = ~A~%Ymax = ~A~%H = ~A~%"
     ;;         *x-min* *x-max* *y-min* *y-max* *buffer-height*)
