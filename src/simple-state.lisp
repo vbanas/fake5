@@ -409,11 +409,14 @@
           (%do)))
     (format t "Selected state with score ~,3F~%" (field-score best-state))
     (with-open-file
-        (*standard-output* solution-file
+        (*standard-output* (if (= (field-score best-state) 1)
+                               (format nil "~A.good" solution-file)
+                               solution-file)
                            :direction :output
                            :if-exists :supersede
                            :if-does-not-exist :create)
-      (print-solution (field best-state) :matrix (adjustment-matrix state)))))
+      (print-solution (field best-state) :matrix (adjustment-matrix state))
+      (field-score best-state))))
 
 (defmethod clone-state (_ (st game-state))
   st)
