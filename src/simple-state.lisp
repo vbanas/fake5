@@ -378,9 +378,16 @@
          (state root-state)
          (best-state state)
          (game :origami-solver)
-         (iteration 0))
+         (iteration 0)
+         (stop-time (when timeout
+                      (+ (get-internal-run-time)
+                         (* timeout
+                            internal-time-units-per-second)))))
     (loop while (and (< (field-score state) 1)
-                     (< iteration iters-count))
+                     (< iteration iters-count)
+                     (if stop-time
+                         (< (get-internal-run-time) stop-time)
+                         t))
        do
          (incf iteration)
          (let* ((action (select-next-move game state iters-per-move

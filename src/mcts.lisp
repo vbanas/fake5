@@ -59,10 +59,11 @@
                      (if stop-time
                          (< (get-internal-run-time) stop-time)
                          t))
-       do
+       do 
          (multiple-value-bind (node state)
              (find-best-nested-child
               root (clone-state *game* initial-state))
+           (incf i)
            (backup node (estimate-state-reward *game* state))))
     (action
      ;; No exploration when selecting real action
