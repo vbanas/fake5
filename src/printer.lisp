@@ -3,7 +3,7 @@
         :src/simple-state)
   (:import-from :alexandria)
   (:export #:print-problem 
-           ))
+           #:print-solution))
 
 (in-package :src/printer)
 

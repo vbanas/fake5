@@ -267,15 +267,18 @@
                ;; (format t "result: ~A~%"
                ;;         (mapcar #'polygon->list result))
                (draw-polygons-to-svg
-                result :filename file))))
+                result :filename file)
+               result)))
     (let ((file-pn (pathname file)))
       (if animate
-          (loop for i from 0 to (length fold-specs) do
-               (%once (make-pathname
-                       :defaults file-pn
-                       :name (format nil "~A~A"
-                                     (pathname-name file-pn) i))
-                      (subseq fold-specs 0 i)))
+          (progn
+            (loop for i from 0 to (length fold-specs) do
+                 (%once (make-pathname
+                         :defaults file-pn
+                         :name (format nil "~A~A"
+                                       (pathname-name file-pn) i))
+                        (subseq fold-specs 0 i)))
+            (fold-quad fold-specs))
           (%once file fold-specs)))))
 
 (defun area-simple-polygon (polygon)
