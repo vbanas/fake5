@@ -6,8 +6,8 @@
 
 (defparameter *background-color* (list 1 1 1)) ;; white
 (defparameter *polygon-color* (list 1 0 0)) ;; red
-(defparameter *clockwise-polygon-color* (list 1 1 1)) ;; white
-(defparameter *counterclockwise-polygon-color* (list 0 1 0)) ;; green
+(defparameter *clockwise-polygon-color* *background-color*) 
+(defparameter *counterclockwise-polygon-color* *polygon-color*) 
 
 (defun set-source-color (color)
   (set-source-rgb (first color) (second color) (third color)))
@@ -36,7 +36,15 @@
   (assert (and *x-min* *x-max* *y-min* *y-max*
                *buffer-width* *buffer-height*)))
 
-(defmethod draw-polygon-to-surface ((polygon cl-geometry:polygon))
+(defmethod draw-polygon-to-surface :around ((polygon src/types:clockwise-polygon))
+  (let ((*polygon-color* *clockwise-polygon-color*))
+    (call-next-method)))
+
+(defmethod draw-polygon-to-surface :around ((polygon src/types:counterclockwise-polygon))
+  (let ((*polygon-color* *counterclockwise-polygon-color*))
+    (call-next-method)))
+
+(defmethod draw-polygon-to-surface ((polygon cl-geometry:polygon)) 
   (set-source-color *polygon-color*)
   (set-line-width 1)
   (let ((points (mapcar #'draw-coordinates (cl-geometry:point-list polygon))))
@@ -125,4 +133,6 @@
         (compute-score-for-buffers
          (image-surface-get-data s1)
          (image-surface-get-data s2))
-      (/ count-and count-or))))
+      (if (zerop count-or)
+          0
+          (/ count-and count-or)))))
