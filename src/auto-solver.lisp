@@ -13,8 +13,7 @@
         :src/types
         :src/simple-state)
   (:import-from :cl-geometry
-                :point-equal-p)
-  (:import-from :trivial-timeout)
+                :point-equal-p) 
   (:export :auto-solve))
 
 (in-package :src/auto-solver)
