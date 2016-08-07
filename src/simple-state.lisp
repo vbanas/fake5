@@ -507,8 +507,9 @@
                                  (when (polygons-to-fold action)
                                    (alexandria:hash-table-keys (polygons-to-fold action)))
                                  file))))
-           (when (> (field-score state)
-                    (field-score best-state))
+           (when (and (> (resemblance state)
+                         (resemblance best-state))
+                      (> (field-score state) 0))
              (setf best-state state))
            (format t "Iteration ~A resemblance ~,3F~%"
                    iteration (resemblance state))
