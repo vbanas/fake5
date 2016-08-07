@@ -494,8 +494,9 @@
              (format t "No more actions found")
              (return))
            (setf state (next-state state action))
-           (when (> (field-score state)
-                    (field-score best-state))
+           (when (and (> (resemblance state)
+                         (resemblance best-state))
+                      (> (field-score state) 0))
              (setf best-state state))
            (format t "Iteration ~A resemblance ~,3F~%"
                    iteration (resemblance state))
