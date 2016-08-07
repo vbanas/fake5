@@ -33,8 +33,10 @@
                 (format t "~%-> ~A~%" (pathname-name problem-file))
                 (multiple-value-prog1
                     (cons name (handler-case
-                                   (and  (src/simple-state::solve problem-file dest :timeout 10
-                                                                  ;;:iters-count 200 :iters-per-move 100
+                                   (and  (src/simple-state::solve problem-file dest
+                                                                  :timeout 20
+                                                                  ;;:iters-count 25
+                                                                  ;;:iters-per-move 100
                                                                   )
                                          :passed)
                                  (error () :error)))
