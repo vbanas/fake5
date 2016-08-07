@@ -7,7 +7,8 @@
   (:import-from :src/types)
   (:import-from :src/parser)
   (:export #:draw-problem
-           #:draw-polygons-to-svg))
+           #:draw-polygons-to-svg
+           #:dump-problems))
 
 (in-package :src/drawer)
 

@@ -3,18 +3,26 @@
         :cl-geometry
         :src/drawer
 	:src/simple-state
-        :src/printer))
+    :src/printer
+    :src/matrix))
 
 (in-package :src/generator)
 
 (defun generator-test (file &key res-file)
   (let* ((new-specs)
-	 (specs-size 11))
+         (specs-size 11)
+         (m-for-rotation (1+ (random 10000)))
+         (n-for-rotation (1+ (random 10000))))
     (loop for n from 1 to specs-size do
-	 (push (list :a (+ (random 5) 1/100) :b (+ (random 3) 1/100) :c (- (/ (random 7) (1+ (random 3)))) :x (random 2) :y (random 3)) new-specs))
-    (labels ((%do ()
+         (push (list :a (+ (random 3) 1/100) :b (+ (random 5) 1/100) :c (- (/ (random 7) (1+ (random 11)))) :x (random 7) :y (random 5)) new-specs))
+    (labels ((%draw (x)
+	       (draw-polygons-to-svg
+                x :filename (format nil "~A.final.svg" file))
+	       x)
+	     (%do ()
                (print-solution
-                (src/simple-state::fold-quad-and-show file new-specs :animate t))))
+                (%draw (mapcar (lambda (p) (rotate-polygon p m-for-rotation n-for-rotation))
+			       (src/simple-state::fold-quad-and-show file new-specs :animate t))))))
       (if res-file
           (with-open-file (*standard-output* res-file :direction :output
                                              :if-exists :supersede

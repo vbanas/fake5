@@ -12,6 +12,7 @@
            #:identity-tr-matrix
            #:translate-matrix
            #:mult-polygon-matrix
+           #:mult-polygons-matrix
            #:rotate-polygon
            #:rotate-point
            #:rotate-edge-to-x-matrix
@@ -28,26 +29,33 @@
         (list 0 0 1)))
 
 (defun inverse-tr-matrix (matr)
-  (destructuring-bind ((m00 m01 m02) (m10 m11 m12) (m20 m21 m22)) matr
+  (destructuring-bind ((m00 m10 m20) (m01 m11 m21) (m02 m12 m22)) matr
     (let ((det (- (+ (* m00 m11 m22)
                      (* m01 m12 m20)
                      (* m02 m10 m21))
                   (* m00 m12 m21)
-                  (* m01 m12 m22)
+                  (* m01 m10 m22)
                   (* m02 m11 m20))))
       (mapcar (lambda (row)
                 (mapcar (lambda (v)
                           (/ v det))
                         row))
               (list (list (- (* m11 m22) (* m12 m21))
-                          (- (* m02 m21) (* m01 m22))
-                          (- (* m01 m12) (* m02 m11)))
-                    (list (- (* m12 m20) (* m10 m22))
+                          (- (* m12 m20) (* m10 m22))
+                          (- (* m10 m21) (* m11 m20)))
+                    (list (- (* m02 m21) (* m01 m22))
                           (- (* m00 m22) (* m02 m20))
-                          (- (* m02 m10) (* m00 m12)))
-                    (list (- (* m10 m21) (* m11 m20))
-                          (- (* m01 m20) (* m00 m21))
+                          (- (* m01 m20) (* m00 m21)))
+                    (list (- (* m01 m12) (* m02 m11))
+                          (- (* m02 m10) (* m00 m12))
                           (- (* m00 m11) (* m01 m10))))))))
+
+(defun inverse-tr-matrix-test ()
+  (labels ((%test (matr)
+             (assert (equal (identity-tr-matrix)
+                            (mult-tr-matrix matr (inverse-tr-matrix matr))))))
+    (%test '((1 0 0) (0 1 0) (0 0 1)))
+    (%test '((0 -1 0) (1 0 0) (0 0 1)))))
 
 (defun transpose-tr-matrix (matrix)
   (when (notevery #'null matrix)
@@ -68,6 +76,10 @@
    (loop for point in (point-list polygon) collect
         (mult-point-matrix point matr))))
 
+(defun mult-polygons-matrix (polygons matr)
+  (loop for poly in polygons collect
+       (mult-polygon-matrix poly matr)))
+
 (defun mult-edge-matrix (edge matr)
   (make-instance 'line-segment
                  :start (mult-point-matrix (start edge) matr)
@@ -78,7 +90,7 @@
                            (list (y point))
                            '(1)))
          (res-matr (mult-tr-matrix matr point-matr)))
-    (make-instance 'point
+    (copy-instance point
                    :x (car (first res-matr))
                    :y (car (second res-matr)))))
 

@@ -321,8 +321,13 @@
           :accessor field
           :initarg :field)
    (field-score :type number
+                :documentation "Score for mcts"
                 :accessor field-score
                 :initarg :field-score)
+   (resemblance :type number
+                :documentation "Score by area"
+                :accessor resemblance
+                :initarg :resemblance)
    (adjustment-matrix :type list
                       :documentation "list of lists of values, describes translation of original problem"
                       :accessor adjustment-matrix
@@ -330,7 +335,15 @@
    (target-field :type list
                  :documentation "List of polygons describing desired final state"
                  :accessor target-field
-                 :initarg :target-field)))
+                 :initarg :target-field)
+   (adjusted :type t
+             :accessor adjusted
+             :initarg :adjusted
+             :initform nil)
+   (possible-adjustment-matrices :type list
+                                 :documentation "List of all matrices to consider at first move"
+                                 :accessor possible-adjustment-matrices
+                                 :initarg :possible-adjustment-matrices)))
 
 (defun read-task-state (filename)
   (let* ((problem (parse-problem filename))
@@ -338,18 +351,18 @@
          (bbox (reduce #'src/drawer::bounding-box-union
                        (mapcar #'cl-geometry::construct-bounding-box
                                (silhouette problem))))
-         (matrix (translate-matrix (- (cl-geometry::x-min bbox))
-                                   (- (cl-geometry::y-min bbox))))
-         (inv-matrix (inverse-tr-matrix matrix))
-         (silhouette (loop for poly in (silhouette problem) collect
-                          (mult-polygon-matrix poly matrix))))
+         (bb-matrix (translate-matrix (- (cl-geometry::x-min bbox))
+                                      (- (cl-geometry::y-min bbox))))
+         (silhouette (mult-polygons-matrix (silhouette problem) bb-matrix))
+         (possible-adj-matrs (or (polygons-right-matrices silhouette)
+                                 (list (identity-tr-matrix)))
+           ))
     (make-instance 'game-state
                    :field (list start)
-                   :adjustment-matrix inv-matrix
+                   :adjustment-matrix bb-matrix
                    :target-field silhouette
-                   :field-score (get-field-score
-                                 (list start)
-                                 silhouette))))
+                   :field-score 0
+                   :possible-adjustment-matrices possible-adj-matrs)))
 
 (defclass problem-spec ()
   ((root-state :initarg :root-state
@@ -471,20 +484,25 @@
            (when (> (field-score state)
                     (field-score best-state))
              (setf best-state state))
-           (format t "Iteration ~A score ~,3F~%"
-                   iteration (field-score state))
+           (format t "Iteration ~A resemblance ~,3F~%"
+                   iteration (resemblance state))
            (when log-dir
              (let ((file (make-pathname
-                          :name (format nil "~A" iteration)
+                          :name (format nil "~A~A" iteration
+                                        (if (= iteration 1)
+                                            "-adjusted"
+                                            ""))
                           :type "svg"
                           :defaults log-dir)))
-               (draw-polygons-to-svg (field state) :filename file)))))
-    (format t "Selected state with score ~,3F~%" (field-score best-state))
+               (draw-polygons-to-svg (if (= iteration 1)
+                                         (target-field state)
+                                         (field state)) :filename file)))))
+    (format t "Selected state with resemblance ~,3F~%" (resemblance best-state))
     (let* ((path (pathname solution-file))
            (name (pathname-name path))
            (type (pathname-type path))
            (dir (make-pathname :directory (pathname-directory path)))
-           (filename (if (= (field-score best-state) 1)
+           (filename (if (= (resemblance best-state) 1)
                          (format nil "~A/../maybe_good_solutions/~A.~A" dir name type)
                          solution-file)))
       (with-open-file
@@ -492,8 +510,12 @@
                              :direction :output
                              :if-exists :supersede
                              :if-does-not-exist :create)
-        (print-solution (field best-state) :matrix (adjustment-matrix state))
-        (field-score best-state)))))
+        (print-solution (field best-state) :matrix (inverse-tr-matrix
+                                                    (adjustment-matrix state)))
+        (resemblance best-state))
+      (values (field best-state)
+              (inverse-tr-matrix
+               (adjustment-matrix state))))))
 
 (defmethod clone-state ((st game-state))
   st)
@@ -506,21 +528,42 @@
                  :type point
                  :initarg :folding-side)))
 
+(defclass adjustment-action ()
+  ((adjustment-matrix :accessor adjustment-matrix
+                      :type list
+                      :initarg :adjustment-matrix)))
+
 (defmethod print-object ((a action) stream)
   (format t "(action: line ~A side ~A)"
           (folding-line a) (folding-side a)))
 
-(defmethod next-state ((st game-state) action &key
-                                                (skip-score nil)
-                                                &allow-other-keys)
+(defmethod next-state ((st game-state) (action action))
   (let ((new-field (fold-polygon-list (field st)
                                       (folding-line action)
                                       (folding-side action))))
-    (copy-instance
-     st
-     :field new-field
-     :field-score (unless skip-score
-                    (get-field-score new-field (target-field st))))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score new-field (target-field st))
+      (copy-instance
+       st
+       :field new-field
+       :field-score score
+       :resemblance resemblance))))
+
+(defmethod next-state ((st game-state) (action adjustment-action))
+  (let* ((matrix (adjustment-matrix action))
+         (new-silhouette (mult-polygons-matrix (target-field st)
+                                               matrix)))
+    (assert (equal (identity-tr-matrix)
+                   (mult-tr-matrix matrix (inverse-tr-matrix matrix))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score (field st) new-silhouette)
+      (copy-instance
+       st
+       :target-field new-silhouette
+       :adjusted t
+       :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
+       :field-score score
+       :resemblance resemblance))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -538,25 +581,44 @@
 
 ;; TODO: use rotate-edge-to-x-matrix to find rotations
 ;;       for the first move
-(defmethod possible-actions ((st game-state))
+(defun possible-folds-actions (st)
   (let ((l
          (loop for polygon in (target-field st) append
-               (loop for edge in (edge-list polygon) append
-                     (let* ((line (line-from-segment edge))
-                            (direction-point
-                             (find-non-collinear-point line polygon)))
-                       (when (and direction-point
-                                  (valid-move? (field st) line))
-                         (list
-                          (make-instance
-                           'action
-                           :folding-line line
-                           :folding-side direction-point))))))))
+              (loop for edge in (edge-list polygon) append
+                   (let* ((line (line-from-segment edge))
+                          (direction-point
+                           (find-non-collinear-point line polygon)))
+                     (when (and direction-point
+                                (valid-move? (field st) line))
+                       (list
+                        (make-instance
+                         'action
+                         :folding-line line
+                         :folding-side direction-point))))))))
     ;;(format t ">> possible-actions: ~A~%" l)
     l))
 
+(defun possible-adjustment-actions (st)
+  (loop for matr in (possible-adjustment-matrices st) collect
+       (make-instance 'adjustment-action :adjustment-matrix matr)))
+
+(defmethod possible-actions ((st game-state))
+  (if (adjusted st)
+      (possible-folds-actions st)
+      (possible-adjustment-actions st)))
+
 (defun get-field-score (field target-field)
-  (compute-score-for-polygons target-field field))
+  (let ((size (length (with-output-to-string (s)
+                        (print-solution field :stream s))))
+        (resemblance (compute-score-for-polygons target-field field)))
+    ;; (format t "field size = ~A; " size) 
+    ;; (format t "resemblance = ~A~%" (+ 0.0 resemblance))
+    (values
+     (if (> size 5000)
+         0
+         (- resemblance
+            (* 1/13 (/ size 5000))))
+     resemblance)))
 
 (defmethod estimate-state-reward ((st game-state))
   ;; (labels ((%once (st)
@@ -638,3 +700,37 @@
            :expected '(((2 1 1 0) (1 0 0 1))
                        ((1 0 0 0) (0 0 0 1))))
     t))
+
+(defun edge-pair-tr-matrix (pair)
+  (let* ((target-edge (cdr pair))
+         (move-matr (translate-matrix (- (x (start target-edge)))
+                                      (- (y (start target-edge)))))
+         (rot-matr (rotate-edge-to-x-matrix target-edge)))
+    (when rot-matr
+      (mult-tr-matrix rot-matr move-matr))))
+
+(defun test-edge-pair-tr-matrix ()
+  (labels ((%test (&key coords expected)
+             (let* ((pair (destructuring-bind (x0 y0 x1 y1 x2 y2)
+                              coords
+                            (cons (make-instance 'line-segment
+                                                 :start (make-instance 'point :x x0 :y y0)
+                                                 :end (make-instance 'point :x x1 :y y1))
+                                  (make-instance 'line-segment
+                                                 :start (make-instance 'point :x x1 :y y1)
+                                                 :end (make-instance 'point :x x2 :y y2)))))
+                    (result (edge-pair-tr-matrix pair)))
+               (assert1 result expected))))
+    (%test :coords '(0 0 1 0 1 1)
+           :expected '((0 1 0) (-1 0 1) (0 0 1)))
+    t))
+
+(defun polygons-right-matrices (polygons)
+  (let ((edge-pairs (detect-right-angles polygons)))
+    (remove nil (mapcar #'edge-pair-tr-matrix edge-pairs))))
+
+(defun polygons-right-adjusted (polygons)
+  (let ((matrs (polygons-right-matrices polygons)))
+    (loop for matr in matrs collect
+         (loop for poly in polygons collect
+              (mult-polygon-matrix poly matr)))))

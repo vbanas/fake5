@@ -11,7 +11,8 @@
         :src/parser
         :src/printer
         :src/types
-        :src/simple-state)
+        :src/simple-state
+        :anaphora)
   (:import-from :cl-geometry
                 :point-equal-p) 
   (:export :auto-solve))
@@ -27,8 +28,17 @@
                    (dest (format nil "~A~A.txt" solution-folder name)))
               (unless (or (probe-file (format nil "~A../solved-problems/~A.txt" directory name))
                           (probe-file (format nil "~A../our-problems/~A.txt" directory name)))
+                (awhen (probe-file (format nil "~A~A.txt" solution-folder name))
+                  (delete-file it))
                 (format t "~%-> ~A~%" (pathname-name problem-file))
-                (cons name (src/simple-state::solve problem-file dest :timeout 10 :iters-count 200 :iters-per-move 100)))))
+                (multiple-value-prog1
+                    (cons name (handler-case
+                                   (src/simple-state::solve problem-file dest :timeout 10
+                                                            ;;:iters-count 200 :iters-per-move 100
+                                                            )
+                                 (error () :error)))
+                  (awhen (probe-file (format nil "~A../newproblems/~A" directory name))
+                    (delete-file it))))))
           (directory problem-folder)))
 
 ;; (defun dump-res-to-file (res res-file)
