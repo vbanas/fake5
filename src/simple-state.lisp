@@ -445,6 +445,8 @@
           (return-from valid-move? t)))
   nil)
 
+;; TODO: use rotate-edge-to-x-matrix to find rotations
+;;       for the first move
 (defmethod possible-actions (_ (st game-state))
   (let ((l
          (loop for polygon in (target-field st) append
