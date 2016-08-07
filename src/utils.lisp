@@ -5,7 +5,12 @@
   (:export #:polygons->problem
            #:split-list-at
            #:point-with-origin
-           #:orig-point))
+           #:orig-point
+           #:assert1
+           #:point->list
+           #:edge->list
+           #:polygon->list
+           ))
 
 (in-package :src/utils)
 ;; Taken from
@@ -95,3 +100,22 @@
 (defclass point-with-origin (cl-geometry::point)
   ((orig-point :initarg :orig-point
                :accessor orig-point)))
+
+(defun assert1 (result expected)
+  (unless (equalp result expected)
+    (error
+     (with-output-to-string (*standard-output*)
+       (format t "No match, expected:~%~A~%" expected)
+       (format t "Result:~%~A~%" result)))))
+
+(defun point->list (point)
+  (list (x point) (y point)))
+
+(defun polygon->list (polygon)
+  (alexandria:mappend
+   #'point->list
+   (point-list polygon)))
+
+(defun edge->list (edge)
+  (append (point->list (start edge))
+          (point->list (end edge))))

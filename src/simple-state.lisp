@@ -141,21 +141,6 @@
               (make-polygon-from-point-list (reverse points-2)))
         (list polygon))))
 
-(defun point->list (point)
-  (list (x point) (y point)))
-
-(defun polygon->list (polygon)
-  (alexandria:mappend
-   #'point->list
-   (point-list polygon)))
-
-(defun assert1 (result expected)
-  (unless (equalp result expected)
-    (error
-     (with-output-to-string (*standard-output*)
-       (format t "No match, expected:~%~A~%" expected)
-       (format t "Result:~%~A~%" result)))))
-
 (defun test-split-polygon ()
   (labels ((%test (&key a b c coords expected)
              (let* ((p (apply #'make-polygon-from-coords-with-origins coords))
@@ -521,10 +506,6 @@
 (defun vec-product (a b)
   (+ (* (x a) (x b))
      (* (y a) (y b))))
-
-(defun edge->list (edge)
-  (append (point->list (start edge))
-          (point->list (end edge))))
 
 (defun test-detect-right-angles ()
   (labels ((%test (&key coords expected)
