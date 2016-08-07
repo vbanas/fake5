@@ -32,12 +32,10 @@
                   (delete-file it))
                 (format t "~%-> ~A~%" (pathname-name problem-file))
                 (multiple-value-prog1
-                    (cons name (handler-case
-                                   (and  (src/simple-state::solve problem-file dest :timeout 20
-                                                                  ;;:iters-count 200 :iters-per-move 100
-                                                                  )
-                                         :passed)
-                                 (error () :error)))
+                    (cons name (and  (src/simple-state::solve problem-file dest :timeout 20
+                                                              ;;:iters-count 200 :iters-per-move 100
+                                                              )
+                                     :passed))
                   (awhen (probe-file (format nil "~A../newproblems/~A" directory name))
                     (delete-file it))))))
           (directory problem-folder)))
