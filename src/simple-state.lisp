@@ -374,6 +374,7 @@
                    :adjustment-matrix bb-matrix
                    :target-field silhouette
                    :field-score 0
+                   :resemblance 0
                    :possible-adjustment-matrices possible-adj-matrs)))
 
 (defclass problem-spec ()
@@ -477,7 +478,7 @@
                       (+ (get-internal-run-time)
                          (* timeout
                             internal-time-units-per-second)))))
-    (loop while (and (< (field-score state) 1)
+    (loop while (and (< (resemblance state) 1)
                      (< iteration iters-count)
                      (if stop-time
                          (< (get-internal-run-time) stop-time)
@@ -714,7 +715,7 @@
      (if (> size 5000)
          0
          (- resemblance
-            (* 1/13 (/ size 5000))))
+            (* 1/13 (/ size 5000)))) 
      resemblance)))
 
 (defmethod estimate-state-reward ((st game-state))
