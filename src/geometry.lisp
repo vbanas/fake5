@@ -10,7 +10,9 @@
         :anaphora)
   (:import-from :cl-geometry
                 :point-equal-p)
-  (:import-from :cl-containers))
+  (:import-from :cl-containers)
+  (:export #:classify-polygon-edges
+           #:direction-from-edge))
 
 (in-package :src/geometry)
 
@@ -99,7 +101,6 @@
          ;; 'edges' contains only edges that start from 'point'
          (destructuring-bind (point edges)
              (cl-heap:dequeue heap)
-           (format t "Got ~A, ~A from queue~%" point edges)
            (setf scan-line
                  (remove-if (lambda (edge)
                               (eq (right-point edge)
@@ -120,3 +121,23 @@
   (let* ((poly (car (silhouette (parse-problem filename))))
          (tab (classify-polygon-edges poly)))
     (draw-classified-polygon poly tab svg-filename)))
+
+(defun direction-from-edge (edge class)
+  (with-slots (start end) edge
+    (ecase class
+      (:entry (if (= (x start)
+                     (x end))
+                  (copy-instance
+                   start
+                   :x (- (x start) 1))
+                  (copy-instance
+                   start
+                   :y (+ (y start) 1))))
+      (:exit (if (= (x start)
+                    (x end))
+                 (copy-instance
+                  start
+                  :x (+ (x start) 1))
+                 (copy-instance
+                  start
+                  :y (- (y start) 1)))))))
