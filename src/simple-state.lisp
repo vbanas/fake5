@@ -330,7 +330,15 @@
    (target-field :type list
                  :documentation "List of polygons describing desired final state"
                  :accessor target-field
-                 :initarg :target-field)))
+                 :initarg :target-field)
+   (adjusted :type t
+             :accessor adjusted
+             :initarg :adjusted
+             :initform nil)
+   (possible-adjustment-matrices :type list
+                                 :documentation "List of all matrices to consider at first move"
+                                 :accessor possible-adjustment-matrices
+                                 :initarg :possible-adjustment-matrices)))
 
 (defun read-task-state (filename)
   (let* ((problem (parse-problem filename))
@@ -340,16 +348,18 @@
                                (silhouette problem))))
          (matrix (translate-matrix (- (cl-geometry::x-min bbox))
                                    (- (cl-geometry::y-min bbox))))
-         (inv-matrix (inverse-tr-matrix matrix))
-         (silhouette (loop for poly in (silhouette problem) collect
-                          (mult-polygon-matrix poly matrix))))
+         ;; (inv-matrix (inverse-tr-matrix matrix))
+         (silhouette (silhouette problem))
+         (possible-adj-matrs ;;(polygons-right-matrices silhouette)
+           (list matrix)))
     (make-instance 'game-state
                    :field (list start)
-                   :adjustment-matrix inv-matrix
+                   :adjustment-matrix (identity-tr-matrix)
                    :target-field silhouette
                    :field-score (get-field-score
                                  (list start)
-                                 silhouette))))
+                                 silhouette)
+                   :possible-adjustment-matrices possible-adj-matrs)))
 
 (defun solve (problem-file solution-file
               &key
@@ -404,7 +414,8 @@
                              :direction :output
                              :if-exists :supersede
                              :if-does-not-exist :create)
-        (print-solution (field best-state) :matrix (adjustment-matrix state))
+        (print-solution (field best-state) :matrix (inverse-tr-matrix
+                                                    (adjustment-matrix state)))
         (field-score best-state)))))
 
 (defmethod clone-state (_ (st game-state))
@@ -418,11 +429,16 @@
                  :type point
                  :initarg :folding-side)))
 
+(defclass adjustment-action ()
+  ((adjustment-matrix :accessor adjustment-matrix
+                      :type list
+                      :initarg :adjustment-matrix)))
+
 (defmethod print-object ((a action) stream)
   (format t "(action: line ~A side ~A)"
           (folding-line a) (folding-side a)))
 
-(defmethod next-state (_ (st game-state) action)
+(defmethod next-state (_ (st game-state) (action action))
   (let ((new-field (fold-polygon-list (field st)
                                       (folding-line action)
                                       (folding-side action))))
@@ -430,6 +446,19 @@
      st
      :field new-field
      :field-score (get-field-score new-field (target-field st)))))
+
+(defmethod next-state (_ (st game-state) (action adjustment-action))
+  (let* ((matrix (adjustment-matrix action))
+         (new-silhouette (mult-polygons-matrix (target-field st)
+                                               matrix)))
+    (assert (equal (identity-tr-matrix)
+                   (mult-tr-matrix matrix (inverse-tr-matrix matrix))))
+    (copy-instance
+     st
+     :target-field new-silhouette
+     :adjusted t
+     :adjustment-matrix matrix
+     :field-score (get-field-score (field st) new-silhouette))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -447,22 +476,31 @@
 
 ;; TODO: use rotate-edge-to-x-matrix to find rotations
 ;;       for the first move
-(defmethod possible-actions (_ (st game-state))
+(defun possible-folds-actions (st)
   (let ((l
          (loop for polygon in (target-field st) append
-               (loop for edge in (edge-list polygon) append
-                     (let* ((line (line-from-segment edge))
-                            (direction-point
-                             (find-non-collinear-point line polygon)))
-                       (when (and direction-point
-                                  (valid-move? (field st) line))
-                         (list
-                          (make-instance
-                           'action
-                           :folding-line line
-                           :folding-side direction-point))))))))
+              (loop for edge in (edge-list polygon) append
+                   (let* ((line (line-from-segment edge))
+                          (direction-point
+                           (find-non-collinear-point line polygon)))
+                     (when (and direction-point
+                                (valid-move? (field st) line))
+                       (list
+                        (make-instance
+                         'action
+                         :folding-line line
+                         :folding-side direction-point))))))))
     ;;(format t ">> possible-actions: ~A~%" l)
     l))
+
+(defun possible-adjustment-actions (st)
+  (loop for matr in (possible-adjustment-matrices st) collect
+       (make-instance 'adjustment-action :adjustment-matrix matr)))
+
+(defmethod possible-actions (_ (st game-state))
+  (if (adjusted st)
+      (possible-folds-actions st)
+      (possible-adjustment-actions st)))
 
 (defun get-field-score (field target-field)
   (compute-score-for-polygons target-field field))
@@ -529,3 +567,36 @@
            :expected '(((2 1 1 0) (1 0 0 1))
                        ((1 0 0 0) (0 0 0 1))))
     t))
+
+(defun edge-pair-tr-matrix (pair)
+  (let* ((target-edge (cdr pair))
+         (move-matr (translate-matrix (- (x (start target-edge)))
+                                      (- (y (start target-edge)))))
+         (rot-matr (rotate-edge-to-x-matrix target-edge)))
+    (mult-tr-matrix rot-matr move-matr)))
+
+(defun test-edge-pair-tr-matrix ()
+  (labels ((%test (&key coords expected)
+             (let* ((pair (destructuring-bind (x0 y0 x1 y1 x2 y2)
+                              coords
+                            (cons (make-instance 'line-segment
+                                                 :start (make-instance 'point :x x0 :y y0)
+                                                 :end (make-instance 'point :x x1 :y y1))
+                                  (make-instance 'line-segment
+                                                 :start (make-instance 'point :x x1 :y y1)
+                                                 :end (make-instance 'point :x x2 :y y2)))))
+                    (result (edge-pair-tr-matrix pair)))
+               (assert1 result expected))))
+    (%test :coords '(0 0 1 0 1 1)
+           :expected '((0 1 0) (-1 0 1) (0 0 1)))
+    t))
+
+(defun polygons-right-matrices (polygons)
+  (let ((edge-pairs (detect-right-angles polygons)))
+    (mapcar #'edge-pair-tr-matrix edge-pairs)))
+
+(defun polygons-right-adjusted (polygons)
+  (let ((matrs (polygons-right-matrices polygons)))
+    (loop for matr in matrs collect
+         (loop for poly in polygons collect
+              (mult-polygon-matrix poly matr)))))
