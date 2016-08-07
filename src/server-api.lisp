@@ -54,21 +54,23 @@
     snapshot-blob))
 
 (defun submit-solution (problem-id path-to-sol-file)
-  (sleep 0.5)
+  (sleep 1)
   (asdf::run-shell-command 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit' > /tmp/solution"
 	   (get-team-key) problem-id path-to-sol-file))
   (with-open-file (foo "/tmp/solution")
-    (let ((table (yason::parse foo)))
-      (if (gethash "ok" table)
-	  (progn
-	    (format t "solution for:~A resemblence:~A~%" problem-id (gethash "resemblance"table))
-	    (if (= 1 (gethash "resemblance" table))
-		:solved
-		:partial))
-	  (progn
-	    (format t "FAILED solution for:~A~%~A~%" problem-id (gethash "error" table))
-	    :failed)))))
+    (handler-case
+	(let ((table (yason::parse foo)))
+	  (if (gethash "ok" table)
+	      (progn
+		(format t "solution for:~A resemblence:~A~%" problem-id (gethash "resemblance"table))
+		(if (= 1 (gethash "resemblance" table))
+		    :solved
+		    :partial))
+	      (progn
+		(format t "FAILED solution for:~A~%~A~%" problem-id (gethash "error" table))
+		:failed)))
+      (error (e) (format t "Connection error:~A.~%" e)))))
 
 (defun submit-all-solutions (folder good-folder problem-folder solved-problem-folder)
   (mapc (lambda (f) 
