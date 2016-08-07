@@ -1,0 +1,256 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="718" height="718" version="1.1" id="toplevel"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <polygon points="523,409 525,403 588,406 593,399 595,399 595,399 672,401 687,386 705,386 713,379 703,369 689,370 644,322 547,330 536,309 5,376"
+           fill="bisque"/>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="564" y1="391" x2="577" y2="367"/>
+    <circle cx="564" cy="391" r="2"/>
+    <circle cx="577" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="588" y1="406" x2="644" y2="322"/>
+    <circle cx="588" cy="406" r="2"/>
+    <circle cx="644" cy="322" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="595" y1="399" x2="629" y2="349"/>
+    <circle cx="595" cy="399" r="2"/>
+    <circle cx="629" cy="349" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="523" y1="409" x2="544" y2="348"/>
+    <circle cx="523" cy="409" r="2"/>
+    <circle cx="544" cy="348" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="672" y1="401" x2="703" y2="369"/>
+    <circle cx="672" cy="401" r="2"/>
+    <circle cx="703" cy="369" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="705" y1="386" x2="713" y2="379"/>
+    <circle cx="705" cy="386" r="2"/>
+    <circle cx="713" cy="379" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="518" y1="385" x2="536" y2="309"/>
+    <circle cx="518" cy="385" r="2"/>
+    <circle cx="536" cy="309" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="513" y1="391" x2="516" y2="375"/>
+    <circle cx="513" cy="391" r="2"/>
+    <circle cx="516" cy="375" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="509" y1="383" x2="512" y2="358"/>
+    <circle cx="509" cy="383" r="2"/>
+    <circle cx="512" cy="358" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="505" y1="398" x2="509" y2="362"/>
+    <circle cx="505" cy="398" r="2"/>
+    <circle cx="509" cy="362" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="505" y1="394" x2="507" y2="367"/>
+    <circle cx="505" cy="394" r="2"/>
+    <circle cx="507" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="505" y1="398" x2="505" y2="376"/>
+    <circle cx="505" cy="398" r="2"/>
+    <circle cx="505" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="509" y1="383" x2="507" y2="367"/>
+    <circle cx="509" cy="383" r="2"/>
+    <circle cx="507" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="513" y1="391" x2="509" y2="362"/>
+    <circle cx="513" cy="391" r="2"/>
+    <circle cx="509" cy="362" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="523" y1="409" x2="512" y2="358"/>
+    <circle cx="523" cy="409" r="2"/>
+    <circle cx="512" cy="358" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="564" y1="391" x2="544" y2="348"/>
+    <circle cx="564" cy="391" r="2"/>
+    <circle cx="544" cy="348" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="588" y1="406" x2="536" y2="309"/>
+    <circle cx="588" cy="406" r="2"/>
+    <circle cx="536" cy="309" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="595" y1="399" x2="577" y2="367"/>
+    <circle cx="595" cy="399" r="2"/>
+    <circle cx="577" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="536" y2="309"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="536" cy="309" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="644" y2="322"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="644" cy="322" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="523" y1="409" x2="5" y2="376"/>
+    <circle cx="523" cy="409" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="544" y2="348"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="544" cy="348" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="588" y1="406" x2="5" y2="376"/>
+    <circle cx="588" cy="406" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="629" y2="349"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="629" cy="349" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="505" y1="398" x2="5" y2="376"/>
+    <circle cx="505" cy="398" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="595" y1="399" x2="5" y2="376"/>
+    <circle cx="595" cy="399" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="672" y1="401" x2="5" y2="376"/>
+    <circle cx="672" cy="401" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="512" y2="358"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="512" cy="358" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="505" y1="394" x2="5" y2="376"/>
+    <circle cx="505" cy="394" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="513" y1="391" x2="5" y2="376"/>
+    <circle cx="513" cy="391" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="509" y2="362"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="509" cy="362" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="564" y1="391" x2="5" y2="376"/>
+    <circle cx="564" cy="391" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="507" y2="367"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="507" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="518" y1="385" x2="5" y2="376"/>
+    <circle cx="518" cy="385" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="577" y2="367"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="577" cy="367" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="705" y1="386" x2="5" y2="376"/>
+    <circle cx="705" cy="386" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="509" y1="383" x2="5" y2="376"/>
+    <circle cx="509" cy="383" r="2"/>
+    <circle cx="5" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="703" y2="369"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="703" cy="369" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="516" y2="375"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="516" cy="375" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="5" y1="376" x2="505" y2="376"/>
+    <circle cx="5" cy="376" r="2"/>
+    <circle cx="505" cy="376" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="672" y1="401" x2="629" y2="349"/>
+    <circle cx="672" cy="401" r="2"/>
+    <circle cx="629" cy="349" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="705" y1="386" x2="644" y2="322"/>
+    <circle cx="705" cy="386" r="2"/>
+    <circle cx="644" cy="322" r="2"/>
+  </g>
+  <g stroke="chocolate" stroke-width="1">
+    <line x1="713" y1="379" x2="703" y2="369"/>
+    <circle cx="713" cy="379" r="2"/>
+    <circle cx="703" cy="369" r="2"/>
+  </g>
+  <g stroke="black" stroke-width="1">
+    <line x1="109" y1="109" x2="609" y2="109"/>
+    <line x1="109" y1="109" x2="109" y2="609"/>
+    <line x1="609" y1="609" x2="109" y2="609"/>
+    <line x1="609" y1="609" x2="609" y2="109"/>
+    <line x1="209" y1="106" x2="209" y2="112"/>
+    <line x1="106" y1="209" x2="112" y2="209"/>
+    <line x1="209" y1="606" x2="209" y2="612"/>
+    <line x1="606" y1="209" x2="612" y2="209"/>
+    <line x1="309" y1="106" x2="309" y2="112"/>
+    <line x1="106" y1="309" x2="112" y2="309"/>
+    <line x1="309" y1="606" x2="309" y2="612"/>
+    <line x1="606" y1="309" x2="612" y2="309"/>
+    <line x1="409" y1="106" x2="409" y2="112"/>
+    <line x1="106" y1="409" x2="112" y2="409"/>
+    <line x1="409" y1="606" x2="409" y2="612"/>
+    <line x1="606" y1="409" x2="612" y2="409"/>
+    <line x1="509" y1="106" x2="509" y2="112"/>
+    <line x1="106" y1="509" x2="112" y2="509"/>
+    <line x1="509" y1="606" x2="509" y2="612"/>
+    <line x1="606" y1="509" x2="612" y2="509"/>
+  </g>
+  <g stroke="gray" stroke-width="1" stroke-dasharray="5,5">
+    <line x1="209" y1="109" x2="209" y2="609"/>
+    <line x1="109" y1="209" x2="609" y2="209"/>
+    <line x1="309" y1="109" x2="309" y2="609"/>
+    <line x1="109" y1="309" x2="609" y2="309"/>
+    <line x1="409" y1="109" x2="409" y2="609"/>
+    <line x1="109" y1="409" x2="609" y2="409"/>
+    <line x1="509" y1="109" x2="509" y2="609"/>
+    <line x1="109" y1="509" x2="609" y2="509"/>
+  </g>
+</svg>
