@@ -22,7 +22,7 @@
 
 (in-package :src/simple-state)
 
-(defparameter *use-partial-folds* nil)
+(defparameter *use-partial-folds* t)
 
 (defun save-origin (point)
   (make-instance 'point-with-origin
