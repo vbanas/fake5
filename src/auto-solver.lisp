@@ -37,7 +37,7 @@
                                                             ;;:iters-count 200 :iters-per-move 100
                                                             )
                                  (error () :error)))
-                  (awhen (probe-file (format nil "~A../newproblems/~A" solution-folder name))
+                  (awhen (probe-file (format nil "~A../newproblems/~A" directory name))
                     (delete-file it))))))
           (directory problem-folder)))
 
