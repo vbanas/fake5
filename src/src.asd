@@ -8,7 +8,7 @@
 	       :src/server-api :src/printer
                :src/polygons :src/auto-solver
 	       :src/simple-state :src/generator
-	       )
+	       :src/normalization)
   :in-order-to ((test-op (load-op :src/test/field
                                   :src/test/state
                                   :src/test/parser)))
