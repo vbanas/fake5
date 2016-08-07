@@ -321,8 +321,13 @@
           :accessor field
           :initarg :field)
    (field-score :type number
+                :documentation "Score for mcts"
                 :accessor field-score
                 :initarg :field-score)
+   (resemblance :type number
+                :documentation "Score by area"
+                :accessor resemblance
+                :initarg :resemblance)
    (adjustment-matrix :type list
                       :documentation "list of lists of values, describes translation of original problem"
                       :accessor adjustment-matrix
@@ -354,14 +359,15 @@
                                  (list bb-matrix))
            ;; (list matrix)
            ))
-    (make-instance 'game-state
-                   :field (list start)
-                   :adjustment-matrix (identity-tr-matrix)
-                   :target-field silhouette
-                   :field-score (get-field-score
-                                 (list start)
-                                 silhouette)
-                   :possible-adjustment-matrices possible-adj-matrs)))
+    (multiple-value-bind (score resemblance)
+        (get-field-score (list start) silhouette)
+      (make-instance 'game-state
+                     :field (list start)
+                     :adjustment-matrix (identity-tr-matrix)
+                     :target-field silhouette
+                     :field-score score
+                     :resemblance resemblance
+                     :possible-adjustment-matrices possible-adj-matrs))))
 
 (defun solve (problem-file solution-file
               &key
@@ -395,8 +401,8 @@
            (when (> (field-score state)
                     (field-score best-state))
              (setf best-state state))
-           (format t "Iteration ~A score ~,3F~%"
-                   iteration (field-score state))
+           (format t "Iteration ~A resemblance ~,3F~%"
+                   iteration (resemblance state))
            (when log-dir
              (let ((file (make-pathname
                           :name (format nil "~A~A" iteration
@@ -408,12 +414,13 @@
                (draw-polygons-to-svg (if (= iteration 1)
                                          (target-field state)
                                          (field state)) :filename file)))))
-    (format t "Selected state with score ~,3F~%" (field-score best-state))
+    (format t "Selected state with resemblance ~,3F~%" (resemblance best-state))
     (let* ((path (pathname solution-file))
+
            (name (pathname-name path))
            (type (pathname-type path))
            (dir (make-pathname :directory (pathname-directory path)))
-           (filename (if (= (field-score best-state) 1)
+           (filename (if (= (resemblance best-state) 1)
                          (format nil "~A/../maybe_good_solutions/~A.~A" dir name type)
                          solution-file)))
       (with-open-file
@@ -423,7 +430,10 @@
                              :if-does-not-exist :create)
         (print-solution (field best-state) :matrix (inverse-tr-matrix
                                                     (adjustment-matrix state)))
-        (field-score best-state)))))
+        (resemblance best-state))
+      (values (field best-state)
+              (inverse-tr-matrix
+               (adjustment-matrix state))))))
 
 (defmethod clone-state (_ (st game-state))
   st)
@@ -449,10 +459,13 @@
   (let ((new-field (fold-polygon-list (field st)
                                       (folding-line action)
                                       (folding-side action))))
-    (copy-instance
-     st
-     :field new-field
-     :field-score (get-field-score new-field (target-field st)))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score new-field (target-field st))
+      (copy-instance
+       st
+       :field new-field
+       :field-score score
+       :resemblance resemblance))))
 
 (defmethod next-state (_ (st game-state) (action adjustment-action))
   (let* ((matrix (adjustment-matrix action))
@@ -460,12 +473,15 @@
                                                matrix)))
     (assert (equal (identity-tr-matrix)
                    (mult-tr-matrix matrix (inverse-tr-matrix matrix))))
-    (copy-instance
-     st
-     :target-field new-silhouette
-     :adjusted t
-     :adjustment-matrix matrix
-     :field-score (get-field-score (field st) new-silhouette))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score (field st) new-silhouette)
+      (copy-instance
+       st
+       :target-field new-silhouette
+       :adjusted t
+       :adjustment-matrix matrix
+       :field-score score
+       :resemblance resemblance))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -510,7 +526,17 @@
       (possible-adjustment-actions st)))
 
 (defun get-field-score (field target-field)
-  (compute-score-for-polygons target-field field))
+  (let ((size (length (with-output-to-string (s)
+                        (print-solution field :stream s))))
+        (resemblance (compute-score-for-polygons target-field field)))
+    ;; (format t "field size = ~A; " size) 
+    ;; (format t "resemblance = ~A~%" (+ 0.0 resemblance))
+    (values
+     (if (> size 5000)
+         0
+         (- resemblance
+            (* 1/13 (/ size 5000))))
+     resemblance)))
 
 (defmethod estimate-state-reward (g (st game-state))
   (labels ((%once (st)
