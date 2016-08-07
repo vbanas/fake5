@@ -351,6 +351,92 @@
                                  (list start)
                                  silhouette))))
 
+(defclass problem-spec ()
+  ((root-state :initarg :root-state
+               :accessor root-state)
+   (iters-count :initarg :iters-count
+                :accessor iters-count)
+   (iters-per-move :initarg :iters-per-move
+                   :accessor iters-per-move)))
+
+(defun solve-once-0 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((state (root-state problem-spec))
+         (best-state state)
+         (iteration 0))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration (iters-count problem-spec)))
+       do
+         (incf iteration)
+         (let ((move (get-best-move
+                      (select-next-move
+                       (make-node-for-state state) state
+                       (iters-per-move problem-spec)))))
+           (unless move
+             (return))
+           (setf state (next-state state move))
+           (when (> (field-score state)
+                    (field-score best-state))
+             (setf best-state state))))
+    best-state))
+
+(defun solve-once-1 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((state (root-state problem-spec))
+         (mcts-root (make-node-for-state state))
+         (best-state state)
+         (iteration 0))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration (iters-count problem-spec)))
+       do
+         (incf iteration)
+         (setf mcts-root (get-best-child
+                          (select-next-move
+                           mcts-root state
+                           (iters-per-move problem-spec))))
+         (when (null (src/mcts::action mcts-root))
+           (return))
+         (setf state (next-state
+                      state (src/mcts::action mcts-root)))
+         (when (> (field-score state)
+                  (field-score best-state))
+           (setf best-state state)))
+    best-state))
+
+(defun solve-once-2 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((root-state (root-state problem-spec))
+         (mcts-root (select-next-move
+                     (make-node-for-state root-state)
+                     root-state (iters-per-move problem-spec)))
+         (actions (get-best-moves-chain mcts-root)))
+    (reduce #'next-state actions
+            :initial-value root-state)))
+
+(defun collect-solution-scores (dir &key iters-count iters-per-move)
+  (labels ((%file (file)
+             (when (pathname-name file)
+               (let* ((spec (make-instance 'problem-spec
+                                           :root-state (read-task-state file)
+                                           :iters-count iters-count
+                                           :iters-per-move iters-per-move))
+                      (spec-2 (make-instance 'problem-spec
+                                             :root-state (read-task-state file)
+                                             :iters-count iters-count
+                                             :iters-per-move (* iters-per-move
+                                                                iters-count))))
+                 (format t "---- ~A ----~%" (pathname-name file))
+                 (let ((score-0 (field-score (solve-once-0 spec))))
+                   (format t "0 -> ~,3F~%" score-0))
+                 (let ((score-1 (field-score (solve-once-1 spec))))
+                   (format t "1 -> ~,3F~%" score-1))
+                 (let ((score-2 (field-score (solve-once-2 spec-2))))
+                   (format t "2 -> ~,3F~%" score-2))
+                 ))))
+    (if (cl-fad:directory-pathname-p dir)
+        (cl-fad:walk-directory dir #'%file)
+        (%file dir))))
+
 (defun solve (problem-file solution-file
               &key
                 (iters-count 100)
@@ -361,7 +447,6 @@
   (let* ((root-state (read-task-state problem-file))
          (state root-state)
          (best-state state)
-         (game :origami-solver)
          (iteration 0)
          (stop-time (when timeout
                       (+ (get-internal-run-time)
@@ -374,12 +459,15 @@
                          t))
        do
          (incf iteration)
-         (let* ((action (select-next-move game state iters-per-move
-                                          :timeout-in-seconds (when timeout (/ timeout iters-count)))))
+         (let* ((action (get-best-move
+                         (select-next-move
+                          (make-node-for-state state) state
+                          iters-per-move
+                          :timeout-in-seconds (when timeout (/ timeout iters-count))))))
            (when (null action)
              (format t "No more actions found")
              (return))
-           (setf state (next-state game state action))
+           (setf state (next-state state action))
            (when (> (field-score state)
                     (field-score best-state))
              (setf best-state state))
@@ -407,7 +495,7 @@
         (print-solution (field best-state) :matrix (adjustment-matrix state))
         (field-score best-state)))))
 
-(defmethod clone-state (_ (st game-state))
+(defmethod clone-state ((st game-state))
   st)
 
 (defclass action ()
@@ -422,14 +510,17 @@
   (format t "(action: line ~A side ~A)"
           (folding-line a) (folding-side a)))
 
-(defmethod next-state (_ (st game-state) action)
+(defmethod next-state ((st game-state) action &key
+                                                (skip-score nil)
+                                                &allow-other-keys)
   (let ((new-field (fold-polygon-list (field st)
                                       (folding-line action)
                                       (folding-side action))))
     (copy-instance
      st
      :field new-field
-     :field-score (get-field-score new-field (target-field st)))))
+     :field-score (unless skip-score
+                    (get-field-score new-field (target-field st))))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -447,7 +538,7 @@
 
 ;; TODO: use rotate-edge-to-x-matrix to find rotations
 ;;       for the first move
-(defmethod possible-actions (_ (st game-state))
+(defmethod possible-actions ((st game-state))
   (let ((l
          (loop for polygon in (target-field st) append
                (loop for edge in (edge-list polygon) append
@@ -467,19 +558,37 @@
 (defun get-field-score (field target-field)
   (compute-score-for-polygons target-field field))
 
-(defmethod estimate-state-reward (g (st game-state))
+(defmethod estimate-state-reward ((st game-state))
+  ;; (labels ((%once (st)
+  ;;            (let* ((actions (possible-actions st))
+  ;;                   (actions-num (length actions))
+  ;;                   (best-st st))
+  ;;              (when actions
+  ;;                (loop for i below 10 do
+  ;;                     (let* ((action (nth (random actions-num) actions)))
+  ;;                       (setf st (next-state st action))
+  ;;                       (if (< (field-score best-st)
+  ;;                              (field-score st))
+  ;;                           (setf best-st st)))))
+  ;;              (field-score best-st)))))
+  ;; (with-scale (32) 
+  ;;   (apply #'max 
+  ;;          (loop for i below 10 collect (%once st))))
+  ;; (loop for i below 10 do
+  ;;       (setf st (%once st)))
+  ;; st)
   (labels ((%once (st)
-             (let* ((actions (possible-actions g st))
+             (let* ((actions (possible-actions st))
                     (actions-num (length actions)))
                (loop for i below actions-num do
                     (let* ((action (nth (random actions-num) actions))
-                           (next-st (next-state g st action)))
+                           (next-st (next-state st action)))
                       (when (< (field-score st)
                                (field-score next-st))
                         (return-from %once next-st))))
                st)))
     (loop for i below 10 do
-          (setf st (%once st)))
+         (setf st (%once st)))
     ;; (format t "estimate-state-reward:~%")
     ;; (format t "field: ~A~%" (mapcar #'polygon->list (field st)))
     ;; (format t "score: ~A~%" (field-score st))
