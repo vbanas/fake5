@@ -529,7 +529,7 @@
            (name (pathname-name path))
            (type (pathname-type path))
            (dir (make-pathname :directory (pathname-directory path)))
-           (filename (if (= (resemblance best-state) 1)
+           (filename (if (> (resemblance best-state) 0.97)
                          (format nil "~A/../maybe_good_solutions/~A.~A" dir name type)
                          solution-file)))
       (with-open-file
