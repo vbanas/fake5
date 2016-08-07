@@ -357,7 +357,7 @@
                                  :documentation "List of all matrices to consider at first move"
                                  :accessor possible-adjustment-matrices
                                  :initarg :possible-adjustment-matrices)
-   (edge-classification :type (or null hashtable)
+   (edge-classification :type (or null hash-table)
                         :accessor edge-classification
                         :initarg :edge-classification
                         :initform nil)))
