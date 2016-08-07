@@ -346,12 +346,14 @@
          (bbox (reduce #'src/drawer::bounding-box-union
                        (mapcar #'cl-geometry::construct-bounding-box
                                (silhouette problem))))
-         (matrix (translate-matrix (- (cl-geometry::x-min bbox))
-                                   (- (cl-geometry::y-min bbox))))
+         (bb-matrix (translate-matrix (- (cl-geometry::x-min bbox))
+                                      (- (cl-geometry::y-min bbox))))
          ;; (inv-matrix (inverse-tr-matrix matrix))
          (silhouette (silhouette problem))
-         (possible-adj-matrs ;;(polygons-right-matrices silhouette)
-           (list matrix)))
+         (possible-adj-matrs (or (polygons-right-matrices silhouette)
+                                 (list bb-matrix))
+           ;; (list matrix)
+           ))
     (make-instance 'game-state
                    :field (list start)
                    :adjustment-matrix (identity-tr-matrix)
