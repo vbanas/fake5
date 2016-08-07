@@ -31,11 +31,14 @@
                 (awhen (probe-file (format nil "~A~A.txt" solution-folder name))
                   (delete-file it))
                 (format t "~%-> ~A~%" (pathname-name problem-file))
-                (cons name (handler-case
-                               (src/simple-state::solve problem-file dest :timeout 10
-                                                        ;;:iters-count 200 :iters-per-move 100
-                                                        )
-                             (error () :error))))))
+                (multiple-value-prog1
+                    (cons name (handler-case
+                                   (src/simple-state::solve problem-file dest :timeout 10
+                                                            ;;:iters-count 200 :iters-per-move 100
+                                                            )
+                                 (error () :error)))
+                  (awhen (probe-file (format nil "~A../newproblems/~A" solution-folder name))
+                    (delete-file it))))))
           (directory problem-folder)))
 
 ;; (defun dump-res-to-file (res res-file)
