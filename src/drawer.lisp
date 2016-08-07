@@ -9,7 +9,8 @@
   (:export #:draw-problem
            #:draw-polygons-to-svg
            #:dump-problems
-           #:draw-action))
+           #:draw-action
+           #:draw-classified-polygon))
 
 (in-package :src/drawer)
 
@@ -109,11 +110,29 @@
   ;;     (draw-field scene)))
   )
 
-(defun draw-line-segment (scene line-segment)
+(defun draw-classified-polygon (polygon classification filename)
+  (let* ((edges (edge-list polygon)))
+    (with-calculated-size ((list polygon))
+      (with-svg-to-file
+          (scene 'svg-1.1-toplevel :height size :width size)
+          (filename :if-exists :supersede)
+        (draw-polygon scene polygon)
+        (mapc (lambda (edge)
+                (draw-line-segment
+                 scene edge
+                 :stroke (ecase (gethash edge classification)
+                           (:entry "red")
+                           (:exit "blue"))
+                 :stroke-width 4))
+              edges)
+        (draw-field scene)))))
+
+(defun draw-line-segment (scene line-segment &key (stroke "chocolate")
+                                               (stroke-width 1))
   (let ((group
-         (make-group scene (:stroke "chocolate"
+         (make-group scene (:stroke stroke
                                     ;;:fill color :opacity alpha
-                                    :stroke-width 1
+                                    :stroke-width stroke-width
                                     ;;:fill-opacity (* alpha 0.6)
                                     ;;:stroke-linecap "round"
                                     ))))
