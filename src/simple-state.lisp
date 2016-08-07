@@ -399,10 +399,15 @@
                    iteration (field-score state))
            (when log-dir
              (let ((file (make-pathname
-                          :name (format nil "~A" iteration)
+                          :name (format nil "~A~A" iteration
+                                        (if (= iteration 1)
+                                            "-adjusted"
+                                            ""))
                           :type "svg"
                           :defaults log-dir)))
-               (draw-polygons-to-svg (field state) :filename file)))))
+               (draw-polygons-to-svg (if (= iteration 1)
+                                         (target-field state)
+                                         (field state)) :filename file)))))
     (format t "Selected state with score ~,3F~%" (field-score best-state))
     (let* ((path (pathname solution-file))
            (name (pathname-name path))
@@ -575,7 +580,8 @@
          (move-matr (translate-matrix (- (x (start target-edge)))
                                       (- (y (start target-edge)))))
          (rot-matr (rotate-edge-to-x-matrix target-edge)))
-    (mult-tr-matrix rot-matr move-matr)))
+    (when rot-matr
+      (mult-tr-matrix rot-matr move-matr))))
 
 (defun test-edge-pair-tr-matrix ()
   (labels ((%test (&key coords expected)
@@ -595,7 +601,7 @@
 
 (defun polygons-right-matrices (polygons)
   (let ((edge-pairs (detect-right-angles polygons)))
-    (mapcar #'edge-pair-tr-matrix edge-pairs)))
+    (remove nil (mapcar #'edge-pair-tr-matrix edge-pairs))))
 
 (defun polygons-right-adjusted (polygons)
   (let ((matrs (polygons-right-matrices polygons)))
