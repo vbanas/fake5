@@ -10,15 +10,19 @@
         :src/cairo 
         :src/parser
         :src/printer
-        :src/types)
+        :src/types
+        :anaphora)
   (:import-from :cl-geometry
-                :point-equal-p) 
+                :point-equal-p)
+  (:import-from :cl-containers)
   (:export :orig-point
            :field
            :adjustment-matrix
            :target-field))
 
 (in-package :src/simple-state)
+
+(defparameter *use-partial-folds* nil)
 
 (defun save-origin (point)
   (make-instance 'point-with-origin
@@ -241,6 +245,14 @@
   (alexandria:mappend
    (lambda (polygon)
      (fold-polygon polygon line point))
+   polygon-list))
+
+(defun fold-some-polygons-in-list (polygon-list line point to-fold-table)
+  (alexandria:mappend
+   (lambda (polygon)
+     (if (gethash polygon to-fold-table)
+         (fold-polygon polygon line point)
+         (list polygon)))
    polygon-list))
 
 (defun fold-quad (fold-specs)
@@ -526,7 +538,10 @@
                  :initarg :folding-line)
    (folding-side :accessor folding-side
                  :type point
-                 :initarg :folding-side)))
+                 :initarg :folding-side)
+   (polygons-to-fold :accessor polygons-to-fold
+                     :type t
+                     :initarg :polygons-to-fold)))
 
 (defclass adjustment-action ()
   ((adjustment-matrix :accessor adjustment-matrix
@@ -538,9 +553,16 @@
           (folding-line a) (folding-side a)))
 
 (defmethod next-state ((st game-state) (action action))
-  (let ((new-field (fold-polygon-list (field st)
-                                      (folding-line action)
-                                      (folding-side action))))
+  (let ((new-field (if (polygons-to-fold action)
+                       (fold-some-polygons-in-list
+                        (field st)
+                        (folding-line action)
+                        (folding-side action)
+                        (polygons-to-fold action))
+                       (fold-polygon-list
+                        (field st)
+                        (folding-line action)
+                        (folding-side action)))))
     (multiple-value-bind (score resemblance)
         (get-field-score new-field (target-field st))
       (copy-instance
@@ -573,28 +595,103 @@
           (values pt pt-sign)))))
   nil)
 
+(defun find-all-non-collinear-points (line polygon)
+  (let (positive negative)
+    (dolist (pt (point-list polygon))
+      (let ((pt-sign (line-equation-res line pt)))
+        (when (< pt-sign 0)
+          (setf negative pt))
+        (when (> pt-sign 0)
+          (setf positive pt))
+        (when (and positive negative)
+          (return-from find-all-non-collinear-points
+            (list positive negative)))))
+    (remove nil (list positive negative))))
+
 (defun valid-move? (field line)
   (loop for polygon in field do
         (when (cdr (split-polygon polygon line))
           (return-from valid-move? t)))
   nil)
 
-;; TODO: use rotate-edge-to-x-matrix to find rotations
-;;       for the first move
+(defun partial-folds (polygons line direction-point)
+  (let ((direction-sign (line-equation-res line direction-point))
+        (union-find (make-instance 'cl-containers:union-find-container
+                                   :test #'eq))
+        (polygon-map (make-hash-table :test #'eq)))
+    (labels ((%add-point (p poly)
+               (unless (cl-containers:find-item union-find (orig-point p))
+                 (cl-containers:insert-item union-find (orig-point p)))
+               (push poly (gethash (orig-point p) polygon-map)))
+             (%union-points (p1 p2)
+               (cl-containers:graft-nodes
+                (cl-containers:representative-node union-find (orig-point p1))
+                (cl-containers:representative-node union-find (orig-point p2)))))
+      (loop for polygon in polygons do
+           (let ((first-point nil))
+             (loop for point in (point-list polygon) do
+                  (let ((sign (line-equation-res line point)))
+                    (when (< (* sign direction-sign) 0)
+                      (%add-point point polygon)
+                      (if first-point
+                          (%union-points point first-point)
+                          (setf first-point point)))))))
+      (let ((res-tab (make-hash-table :test #'eq)))
+        (maphash (lambda (orig-point polys)
+                   (loop for poly in polys do
+                        (let ((repr (cl-containers:representative union-find orig-point)))
+                          (aif (gethash repr res-tab)
+                            (setf (gethash poly it) t)
+                            (let ((tab (make-hash-table :test #'eq)))
+                              (setf (gethash poly tab) t)
+                              (setf (gethash repr res-tab) tab))))))
+                 polygon-map)
+        (alexandria:hash-table-values res-tab)))))
+
+(defun partial-folds-test ()
+  (labels ((%test (specs &key a b c x y expected)
+             (let* ((folded (fold-quad specs))
+                    (l (make-instance 'line :a a :b b :c c))
+                    (res (partial-folds
+                          folded l
+                          (make-instance 'point :x x :y y))))
+               (assert1 (mapcar (lambda (polys)
+                                  (mapcar #'polygon->list (alexandria:hash-table-keys
+                                                           polys)))
+                                res)
+                        expected))))
+    (%test
+     '((:a 0 :b 1 :c -1/2 :x 0 :y 1))
+     :a 1 :b 1 :c -3/2
+     :x 1/2 :y 1/2
+     :expected '(((1 1 1 1/2 0 1/2 0 1))
+                 ((0 1/2 0 1 1 1 1 1/2))))
+    (%test
+     '((:a 0 :b 1 :c -1/2 :x 0 :y 0))
+     :a 1 :b 1 :c -1
+     :x 0 :y 0
+     :expected '(((1 1/2 1 0 0 0 0 1/2)
+                  (0 0 0 1/2 1 1/2 1 0))))))
+
 (defun possible-folds-actions (st)
   (let ((l
          (loop for polygon in (target-field st) append
               (loop for edge in (edge-list polygon) append
                    (let* ((line (line-from-segment edge))
-                          (direction-point
-                           (find-non-collinear-point line polygon)))
-                     (when (and direction-point
-                                (valid-move? (field st) line))
-                       (list
-                        (make-instance
-                         'action
-                         :folding-line line
-                         :folding-side direction-point))))))))
+                          (direction-points
+                           (find-all-non-collinear-points line polygon)))
+                     (loop for direction-point in direction-points append
+                          (let ((folds (if *use-partial-folds*
+                                           (partial-folds (field st) line direction-point)
+                                           (if (valid-move? (field st) line)
+                                               (list nil)
+                                               nil))))
+                            (loop for fold in folds collect
+                                 (make-instance
+                                  'action
+                                  :folding-line line
+                                  :folding-side direction-point
+                                  :polygons-to-fold fold)))))))))
     ;;(format t ">> possible-actions: ~A~%" l)
     l))
 
