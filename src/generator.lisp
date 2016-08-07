@@ -14,7 +14,7 @@
          (m-for-rotation 11)
          (n-for-rotation 7))
     (loop for n from 1 to specs-size do
-         (push (list :a (+ (random 3) 1/100) :b (+ (random 5) 1/100) :c (- (/ (random 7) (1+ (random 11)))) :x (random 11) :y (random 7)) new-specs))
+         (push (list :a (+ (random 5) 1/100) :b (+ (random 3) 1/100) :c (- (/ (random 11) (1+ (random 13)))) :x (random 7) :y (random 11)) new-specs))
     (labels ((%draw (x)
 	       (draw-polygons-to-svg
                 x :filename (format nil "~A.final.svg" file))
