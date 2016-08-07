@@ -23,6 +23,7 @@
 (ql:quickload 'anaphora)
 (ql:quickload 'cl-fad)
 (ql:quickload 'cl-cairo2)
+(ql:quickload 'cl-containers)
 ;;(ql:quickload 'trivial-timeout)
 
 (in-package :cl-user)
