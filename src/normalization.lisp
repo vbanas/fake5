@@ -48,7 +48,9 @@
       (normalized-solution? solution)
     (if normalized?
         solution
-        (normalize-solution
-         (cons (src/polygons::merge-adjacent p1 p2 start-end)
-               (remove p2 (remove p1 solution :test #'eq) :test #'eq))))))
+        (progn
+          (format t "NORMALIZING!~%")
+          (normalize-solution
+           (cons (src/polygons::merge-adjacent p1 p2 start-end)
+                 (remove p2 (remove p1 solution :test #'eq) :test #'eq)))))))
 
