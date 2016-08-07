@@ -6,7 +6,7 @@
 (in-package :src/cairo)
 
 (defparameter *background-color* (list 1 1 1)) ;; white
-(defparameter *polygon-color* (list 1 0 0)) ;; red
+(defparameter *polygon-color* (list 0 0 0)) ;; red
 (defparameter *clockwise-polygon-color* *background-color*) 
 (defparameter *counterclockwise-polygon-color* *polygon-color*) 
 
@@ -66,6 +66,9 @@
   (loop for p in polygons do
        (draw-polygon-to-surface p)))
 
+(defun make-image ()
+  (create-image-surface :rgb24 *buffer-width* *buffer-height*))
+
 (defun draw-solution-to-surfaces (solution-polygons silhouette-polygons
                                   &key (dump-to-png nil))
   (let* ((bounding-box
@@ -84,62 +87,58 @@
     ;;         *x-min* *x-max* *y-min* *y-max* *buffer-height*)
     (values
      ;; solution
-     (let* ((surface (create-image-surface :rgb24 *buffer-width* *buffer-height*))
-            (cl-cairo2::*context* (create-context surface)))
-       (progn (cairo:set-antialias :none)
-              (set-source-color *background-color*)
-              (paint)
-              (draw-polygons-to-surface solution-polygons))
-       (when dump-to-png
-         (surface-write-to-png surface (first dump-to-png)))
-       surface)
+     (get-filled-surface solution-polygons (first dump-to-png))
      
      ;; silhouette
-     (let* ((surface (create-image-surface :rgb24 *buffer-width* *buffer-height*))
-            (cl-cairo2::*context* (create-context surface))
-            ;; (*polygon-color* (list 0 1 0))
-            ;; green
-            )
-       (progn (cairo:set-antialias :none)
-              (set-source-color *background-color*)
-              (paint)
-              (draw-polygons-to-surface silhouette-polygons))
-       (when dump-to-png
-         (surface-write-to-png surface (second dump-to-png)))
-       surface))))
+     (get-filled-surface silhouette-polygons (second dump-to-png)))))
+
+(defun get-filled-surface (polygons dump-to-png)
+  (let* ((surface (make-image))
+         (cl-cairo2::*context* (create-context surface)))
+    (unwind-protect
+         (progn (cairo:set-antialias :none)
+                (set-source-color *background-color*)
+                (paint)
+                (draw-polygons-to-surface polygons))
+      (destroy cl-cairo2::*context*))
+    (when dump-to-png
+      (surface-write-to-png surface dump-to-png))
+    surface))
 
 (defun compute-score-for-buffers (buffer1 buffer2)
-  (let ((c1 nil) (c2 nil)
-        (count-and 0)
-        (count-or 0)
-        (white (list 255 255 255 255)))
-    (loop for x across buffer1
-       for y across buffer2 do
-       ;; (format t "~A ~A~%" c1 c2)
-         (push x c1) (push y c2)
-         (when (and (= (length c1) 4)
-                    (= (length c2) 4)) 
-           ;; (format t "c1 = ~A; c2 = ~A;~%" c1 c2)
-           (cond ((and (equal c1 c2)
-                       (not (equal c1 white)))
-                  (incf count-and)
-                  (incf count-or))
-                 ((or (and (equal c1 white)
-                           (not (equal c2 white)))
-                      (and (equal c2 white)
-                           (not (equal c1 white))))
-                  (incf count-or))
-                 (t nil))
-           (setf c1 nil) (setf c2 nil)))
-    (values count-and count-or)))
+  (cl-cairo2::with-cairo-object (buffer1 pointer1)
+    (cl-cairo2::with-cairo-object (buffer2 pointer2) 
+      (let* ((count-and 0)
+             (count-or 0)
+             (white 255)
+             (data-pointer1 (cl-cairo2::cairo_image_surface_get_data pointer1))
+             (data-pointer2 (cl-cairo2::cairo_image_surface_get_data pointer2))
+             (width (image-surface-get-width buffer1))
+             (height (image-surface-get-height buffer1))
+             (bytes-per-pixel (cl-cairo2::get-bytes-per-pixel (cl-cairo2::image-surface-get-format buffer1))))
+        (loop for i from 0 below (* width height bytes-per-pixel) by 4 do
+             (let ((c1 (cffi:mem-ref data-pointer1 :uint8 i))
+                   (c2 (cffi:mem-ref data-pointer2 :uint8 i)))
+               (cond ((and (= c1 c2)
+                           (not (= c1 white)))
+                      (incf count-and)
+                      (incf count-or))
+                     ((or (and (= c1 white)
+                               (not (= c2 white)))
+                          (and (= c2 white)
+                               (not (= c1 white))))
+                      (incf count-or))
+                     (t nil))))
+        (values count-and count-or)))))
 
 (defun compute-score-for-polygons (ps1 ps2)
   (multiple-value-bind (s1 s2)
       (draw-solution-to-surfaces ps1 ps2)
-    (multiple-value-bind (count-and count-or)
-        (compute-score-for-buffers
-         (image-surface-get-data s1)
-         (image-surface-get-data s2))
-      (if (zerop count-or)
-          0
-          (/ count-and count-or)))))
+    (unwind-protect
+         (multiple-value-bind (count-and count-or)
+             (compute-score-for-buffers s1 s2)
+           (if (zerop count-or)
+               0
+               (/ count-and count-or)))
+      (destroy s1)
+      (destroy s2))))
