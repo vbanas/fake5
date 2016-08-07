@@ -35,7 +35,9 @@
       (:snapshot (yason::parse foo))
       (:problem 
        (format t "problem:~A~%" problem-id)
-       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/problems/~A" problem-id)))
+       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/problems/~A" problem-id))
+       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/newproblems/~A" problem-id))
+       )
       (:solution
        ;;copy to solutions_from_server
        ))))

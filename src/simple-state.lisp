@@ -348,19 +348,15 @@
                                (silhouette problem))))
          (bb-matrix (translate-matrix (- (cl-geometry::x-min bbox))
                                       (- (cl-geometry::y-min bbox))))
-         ;; (inv-matrix (inverse-tr-matrix matrix))
-         (silhouette (silhouette problem))
+         (silhouette (mult-polygons-matrix (silhouette problem) bb-matrix))
          (possible-adj-matrs (or (polygons-right-matrices silhouette)
-                                 (list bb-matrix))
-           ;; (list matrix)
+                                 (list (identity-tr-matrix)))
            ))
     (make-instance 'game-state
                    :field (list start)
-                   :adjustment-matrix (identity-tr-matrix)
+                   :adjustment-matrix bb-matrix
                    :target-field silhouette
-                   :field-score (get-field-score
-                                 (list start)
-                                 silhouette)
+                   :field-score 0
                    :possible-adjustment-matrices possible-adj-matrs)))
 
 (defun solve (problem-file solution-file
@@ -421,8 +417,9 @@
                              :direction :output
                              :if-exists :supersede
                              :if-does-not-exist :create)
-        (print-solution (field best-state) :matrix (inverse-tr-matrix
-                                                    (adjustment-matrix state)))
+        (print-solution (field best-state)
+                        :matrix (inverse-tr-matrix
+                                 (adjustment-matrix state)))
         (field-score best-state)))))
 
 (defmethod clone-state (_ (st game-state))
@@ -464,7 +461,7 @@
      st
      :target-field new-silhouette
      :adjusted t
-     :adjustment-matrix matrix
+     :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
      :field-score (get-field-score (field st) new-silhouette))))
 
 (defun find-non-collinear-point (line polygon)
