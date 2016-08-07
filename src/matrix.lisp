@@ -90,7 +90,7 @@
                            (list (y point))
                            '(1)))
          (res-matr (mult-tr-matrix matr point-matr)))
-    (make-instance 'point
+    (copy-instance point
                    :x (car (first res-matr))
                    :y (car (second res-matr)))))
 
