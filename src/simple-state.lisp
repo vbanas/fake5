@@ -494,6 +494,19 @@
              (format t "No more actions found")
              (return))
            (setf state (next-state state action))
+           (when log-dir
+             (loop for action in (possible-actions state)
+                for action-num from 0 do
+                  (let ((file (make-pathname
+                               :name (format nil "action-~A-~A" iteration action-num)
+                               :type "svg"
+                               :defaults log-dir)))
+                    (draw-action (folding-line action)
+                                 (folding-side action)
+                                 (field state)
+                                 (when (polygons-to-fold action)
+                                   (alexandria:hash-table-keys (polygons-to-fold action)))
+                                 file))))
            (when (and (> (resemblance state)
                          (resemblance best-state))
                       (> (field-score state) 0))
@@ -715,8 +728,7 @@
     (values
      (if (> size 5000)
          0
-         (- resemblance
-            (* 1/13 (/ size 5000)))) 
+         resemblance) 
      resemblance)))
 
 (defmethod estimate-state-reward ((st game-state))
@@ -749,7 +761,9 @@
                         (return-from %once next-st))))
                st)))
     (loop for i below 10 do
-         (setf st (%once st)))
+         (setf st (%once st))
+         (when (= (resemblance st) 1)
+           (return)))
     ;; (format t "estimate-state-reward:~%")
     ;; (format t "field: ~A~%" (mapcar #'polygon->list (field st)))
     ;; (format t "score: ~A~%" (field-score st))

@@ -8,7 +8,8 @@
   (:import-from :src/parser)
   (:export #:draw-problem
            #:draw-polygons-to-svg
-           #:dump-problems))
+           #:dump-problems
+           #:draw-action))
 
 (in-package :src/drawer)
 
@@ -144,6 +145,32 @@
         (mapc (lambda (polygon) (draw-polygon scene polygon)) polygons)
         (mapc (lambda (line) (draw-line-segment scene line)) lines)
         (draw-field scene)))))
+
+(defun draw-action (line point field polys filename)
+  (with-calculated-size (field)
+    (with-svg-to-file
+        (scene 'svg-1.1-toplevel :height size :width size)
+        (filename :if-exists :supersede)
+      (mapc (lambda (polygon) (draw-polygon scene polygon)) polys)
+      (if (= 0 (A line))
+          (draw-line-segment scene
+                             (make-instance 'line-segment
+                                            :start (make-instance 'point
+                                                                  :x 0
+                                                                  :y (line-y-at-x line 0))
+                                            :end (make-instance 'point
+                                                                :x 1
+                                                                :y (line-y-at-x line 1))))
+          (draw-line-segment scene
+                             (make-instance 'line-segment
+                                            :start (make-instance 'point
+                                                                  :y 0
+                                                                  :x (line-x-at-y line 0))
+                                            :end (make-instance 'point
+                                                                :y 1
+                                                                :x (line-x-at-y line 1)))))
+      (draw-point scene point)
+      (draw-field scene))))
 
 (defun dump-problems (problem-folder &key (update-fn #'identity))
   (mapcar (lambda (problem-file)
