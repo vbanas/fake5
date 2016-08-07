@@ -11,6 +11,7 @@
         :src/parser
         :src/printer
         :src/types
+        :src/geometry
         :anaphora)
   (:import-from :cl-geometry
                 :point-equal-p)
@@ -355,7 +356,11 @@
    (possible-adjustment-matrices :type list
                                  :documentation "List of all matrices to consider at first move"
                                  :accessor possible-adjustment-matrices
-                                 :initarg :possible-adjustment-matrices)))
+                                 :initarg :possible-adjustment-matrices)
+   (edge-classification :type (or null hashtable)
+                        :accessor edge-classification
+                        :initarg :edge-classification
+                        :initform nil)))
 
 (defun read-task-state (filename)
   (let* ((problem (parse-problem filename))
@@ -600,7 +605,8 @@
        :adjusted t
        :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
        :field-score score
-       :resemblance resemblance))))
+       :resemblance resemblance
+       :edge-classification (classify-polygon-edges (car new-silhouette))))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -693,8 +699,11 @@
          (loop for polygon in (target-field st) append
               (loop for edge in (edge-list polygon) append
                    (let* ((line (line-from-segment edge))
+                          (edge-class (gethash edge (edge-classification st)))
                           (direction-points
-                           (find-all-non-collinear-points line polygon)))
+                           (if edge-class
+                               (list (direction-from-edge edge edge-class))
+                               (find-all-non-collinear-points line polygon))))
                      (loop for direction-point in direction-points append
                           (let ((folds (if *use-partial-folds*
                                            (partial-folds (field st) line direction-point)
