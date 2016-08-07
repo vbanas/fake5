@@ -477,7 +477,7 @@
                       (+ (get-internal-run-time)
                          (* timeout
                             internal-time-units-per-second)))))
-    (loop while (and (< (field-score state) 1)
+    (loop while (and (< (resemblance state) 1)
                      (< iteration iters-count)
                      (if stop-time
                          (< (get-internal-run-time) stop-time)
