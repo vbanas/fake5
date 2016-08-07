@@ -41,7 +41,7 @@
    ))
 
 (defgeneric possible-actions (state))
-(defgeneric next-state (state action &key &allow-other-keys))
+(defgeneric next-state (state action))
 (defgeneric clone-state (state))
 (defgeneric estimate-state-reward (state))
 
