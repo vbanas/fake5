@@ -353,21 +353,16 @@
                                (silhouette problem))))
          (bb-matrix (translate-matrix (- (cl-geometry::x-min bbox))
                                       (- (cl-geometry::y-min bbox))))
-         ;; (inv-matrix (inverse-tr-matrix matrix))
-         (silhouette (silhouette problem))
+         (silhouette (mult-polygons-matrix (silhouette problem) bb-matrix))
          (possible-adj-matrs (or (polygons-right-matrices silhouette)
-                                 (list bb-matrix))
-           ;; (list matrix)
+                                 (list (identity-tr-matrix)))
            ))
-    (multiple-value-bind (score resemblance)
-        (get-field-score (list start) silhouette)
-      (make-instance 'game-state
-                     :field (list start)
-                     :adjustment-matrix (identity-tr-matrix)
-                     :target-field silhouette
-                     :field-score score
-                     :resemblance resemblance
-                     :possible-adjustment-matrices possible-adj-matrs))))
+    (make-instance 'game-state
+                   :field (list start)
+                   :adjustment-matrix bb-matrix
+                   :target-field silhouette
+                   :field-score 0
+                   :possible-adjustment-matrices possible-adj-matrs)))
 
 (defun solve (problem-file solution-file
               &key
@@ -416,7 +411,6 @@
                                          (field state)) :filename file)))))
     (format t "Selected state with resemblance ~,3F~%" (resemblance best-state))
     (let* ((path (pathname solution-file))
-
            (name (pathname-name path))
            (type (pathname-type path))
            (dir (make-pathname :directory (pathname-directory path)))
@@ -479,7 +473,7 @@
        st
        :target-field new-silhouette
        :adjusted t
-       :adjustment-matrix matrix
+       :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
        :field-score score
        :resemblance resemblance))))
 

@@ -35,7 +35,9 @@
       (:snapshot (yason::parse foo))
       (:problem 
        (format t "problem:~A~%" problem-id)
-       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/problems/~A" problem-id)))
+       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/problems/~A" problem-id))
+       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/newproblems/~A" problem-id))
+       )
       (:solution
        ;;copy to solutions_from_server
        ))))
@@ -86,7 +88,9 @@
 	       ;;nothing to do
 	       )
 	      (:failed))))
-	(cl-fad:list-directory folder)))
+	;; (cl-fad:list-directory folder)
+	(directory folder)
+	))
 
 ;;1470481200 - 11:00 UTC 6_08_2016
 ;;1470484800 - 12:00 UTC
