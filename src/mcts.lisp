@@ -2,12 +2,17 @@
 ;;   http://www.cameronius.com/cv/mcts-survey-master.pdf
 
 (defpackage :src/mcts
-  (:use :common-lisp)
+  (:use :common-lisp
+        :src/utils)
   (:export :select-next-move
            :possible-actions
            :next-state
            :clone-state
-           :estimate-state-reward))
+           :estimate-state-reward
+           :make-node-for-state
+           :get-best-child
+           :get-best-move
+           :get-best-moves-chain))
 
 (in-package :src/mcts)
 
@@ -35,15 +40,14 @@
              :initarg :children)
    ))
 
-(defgeneric possible-actions (game state))
-(defgeneric next-state (game state action))
-(defgeneric clone-state (game state))
-(defgeneric estimate-state-reward (game state))
+(defgeneric possible-actions (state))
+(defgeneric next-state (state action &key &allow-other-keys))
+(defgeneric clone-state (state))
+(defgeneric estimate-state-reward (state))
 
 (defvar *exploration-coefficient*)
-(defvar *game*)
 
-(defun select-next-move (game initial-state max-iters
+(defun select-next-move (root-node root-state max-iters
                          &key
                            timeout-in-seconds
                            (exploration-coefficient 1))
@@ -51,9 +55,8 @@
                       (+ (get-internal-run-time)
                          (* timeout-in-seconds
                             internal-time-units-per-second))))
-         (*game* game)
          (*exploration-coefficient* exploration-coefficient)
-         (root (make-node-for-state initial-state))
+         (root root-node)
          (i 0))
     (loop while (and (< i max-iters)
                      (if stop-time
@@ -62,13 +65,31 @@
        do 
          (multiple-value-bind (node state)
              (find-best-nested-child
-              root (clone-state *game* initial-state))
+              root (clone-state root-state))
            (incf i)
-           (backup node (estimate-state-reward *game* state))))
-    (action
-     ;; No exploration when selecting real action
-     (let ((*exploration-coefficient* 0))
-       (select-best-child root)))))
+           (backup node (estimate-state-reward state))))
+    root))
+
+(defun get-best-child (root)
+  (let* ((*exploration-coefficient* 0)
+         (node (select-best-child root)))
+    (copy-instance node :parent nil)))
+
+(defun get-best-move (root)
+  (let* ((*exploration-coefficient* 0)
+         (node (select-best-child root)))
+    (action node)))
+
+(defun get-best-moves-chain (root)
+  (let* ((*exploration-coefficient* 0)
+         (node (select-best-child root))
+         (root-action (action root)))
+    (if (eq node root)
+        (when root-action (list root-action))
+        (let ((chain (get-best-moves-chain node)))
+          (if root-action
+              (cons root-action chain)
+              chain)))))
 
 (defun find-best-nested-child (node state)
   (with-slots (children unexplored-actions) node
@@ -81,13 +102,13 @@
       (children
        (let* ((best-child (select-best-child node))
               (best-child-state (next-state
-                                 *game* state (action best-child))))
+                                 state (action best-child))))
          (find-best-nested-child best-child best-child-state)))
       (t (error "Should never reach this state")))))
 
 (defun expand-node (node state)
   (let* ((action (pop (unexplored-actions node)))
-         (child-state (next-state *game* state action))
+         (child-state (next-state state action))
          (child-node (make-node-for-state child-state
                                           :parent node
                                           :action action)))
@@ -124,7 +145,7 @@
 (defun make-node-for-state (state &key parent action)
   (make-instance
    'node
-   :unexplored-actions (possible-actions *game* state)
+   :unexplored-actions (possible-actions state)
    :parent parent
    :action action))
 

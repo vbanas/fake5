@@ -1,6 +1,7 @@
 (defpackage :src/cairo
   (:use :common-lisp :src/utils :cl-cairo2 :src/polygons :src/drawer :cl-geometry)
-  (:export #:compute-score-for-polygons))
+  (:export #:compute-score-for-polygons
+           #:with-scale))
 
 (in-package :src/cairo)
 
@@ -21,6 +22,10 @@
 (defparameter *buffer-width* *scale*)
 (defparameter *buffer-height* nil)
 
+(defmacro with-scale ((scale) &body body)
+  `(let* ((*scale* ,scale)
+          (*buffer-width* *scale*))
+     ,@body))
 
 (defun draw-coordinates (point)
   (let ((res (cons (round (* *buffer-width* (/ (- (cl-geometry:x point) *x-min*)

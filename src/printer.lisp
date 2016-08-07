@@ -37,7 +37,7 @@
           (print-silhouette (silhouette p))
           (print-skeleton (skeleton p))))
 
-(defun print-solution (field &key matrix)
+(defun print-solution (field &key matrix (stream t))
   (let ((origins (make-hash-table :test #'equalp))
         (orig-ind -1))
     (labels ((%add-origin (point)
@@ -64,16 +64,16 @@
                 (%add-origin point)))
       ;; Print origins
       (let ((lst (%sorted-origins #'car)))
-        (format t "~A~%" (length lst))
+        (format stream "~A~%" (length lst))
         (loop for (x y) in lst do
-             (format t "~A,~A~%" x y)))
+             (format stream "~A,~A~%" x y)))
       ;; Print polygons
-      (format t "~A~%" (length field))
+      (format stream "~A~%" (length field))
       (loop for poly in field do
            (let ((points (point-list poly)))
-             (format t "~A ~{~A~^ ~}" (length points)
+             (format stream "~A ~{~A~^ ~}" (length points)
                      (mapcar #'%get-origin points)))
-           (format t "~%"))
+           (format stream "~%"))
       ;; Print destintations
       ;; TODO: matrix operations
       (let ((lst (%sorted-origins (alexandria:compose #'cdr #'cdr))))
@@ -81,4 +81,4 @@
              (let ((point (if matrix
                               (mult-point-matrix point matrix)
                               point)))
-               (format t "~A,~A~%" (x point) (y point))))))))
+               (format stream "~A,~A~%" (x point) (y point))))))))

@@ -333,8 +333,13 @@
           :accessor field
           :initarg :field)
    (field-score :type number
+                :documentation "Score for mcts"
                 :accessor field-score
                 :initarg :field-score)
+   (resemblance :type number
+                :documentation "Score by area"
+                :accessor resemblance
+                :initarg :resemblance)
    (adjustment-matrix :type list
                       :documentation "list of lists of values, describes translation of original problem"
                       :accessor adjustment-matrix
@@ -371,6 +376,92 @@
                    :field-score 0
                    :possible-adjustment-matrices possible-adj-matrs)))
 
+(defclass problem-spec ()
+  ((root-state :initarg :root-state
+               :accessor root-state)
+   (iters-count :initarg :iters-count
+                :accessor iters-count)
+   (iters-per-move :initarg :iters-per-move
+                   :accessor iters-per-move)))
+
+(defun solve-once-0 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((state (root-state problem-spec))
+         (best-state state)
+         (iteration 0))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration (iters-count problem-spec)))
+       do
+         (incf iteration)
+         (let ((move (get-best-move
+                      (select-next-move
+                       (make-node-for-state state) state
+                       (iters-per-move problem-spec)))))
+           (unless move
+             (return))
+           (setf state (next-state state move))
+           (when (> (field-score state)
+                    (field-score best-state))
+             (setf best-state state))))
+    best-state))
+
+(defun solve-once-1 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((state (root-state problem-spec))
+         (mcts-root (make-node-for-state state))
+         (best-state state)
+         (iteration 0))
+    (loop while (and (< (field-score state) 1)
+                     (< iteration (iters-count problem-spec)))
+       do
+         (incf iteration)
+         (setf mcts-root (get-best-child
+                          (select-next-move
+                           mcts-root state
+                           (iters-per-move problem-spec))))
+         (when (null (src/mcts::action mcts-root))
+           (return))
+         (setf state (next-state
+                      state (src/mcts::action mcts-root)))
+         (when (> (field-score state)
+                  (field-score best-state))
+           (setf best-state state)))
+    best-state))
+
+(defun solve-once-2 (problem-spec)
+  (clrhash *split-polygon-cache*)
+  (let* ((root-state (root-state problem-spec))
+         (mcts-root (select-next-move
+                     (make-node-for-state root-state)
+                     root-state (iters-per-move problem-spec)))
+         (actions (get-best-moves-chain mcts-root)))
+    (reduce #'next-state actions
+            :initial-value root-state)))
+
+(defun collect-solution-scores (dir &key iters-count iters-per-move)
+  (labels ((%file (file)
+             (when (pathname-name file)
+               (let* ((spec (make-instance 'problem-spec
+                                           :root-state (read-task-state file)
+                                           :iters-count iters-count
+                                           :iters-per-move iters-per-move))
+                      (spec-2 (make-instance 'problem-spec
+                                             :root-state (read-task-state file)
+                                             :iters-count iters-count
+                                             :iters-per-move (* iters-per-move
+                                                                iters-count))))
+                 (format t "---- ~A ----~%" (pathname-name file))
+                 (let ((score-0 (field-score (solve-once-0 spec))))
+                   (format t "0 -> ~,3F~%" score-0))
+                 (let ((score-1 (field-score (solve-once-1 spec))))
+                   (format t "1 -> ~,3F~%" score-1))
+                 (let ((score-2 (field-score (solve-once-2 spec-2))))
+                   (format t "2 -> ~,3F~%" score-2))
+                 ))))
+    (if (cl-fad:directory-pathname-p dir)
+        (cl-fad:walk-directory dir #'%file)
+        (%file dir))))
+
 (defun solve (problem-file solution-file
               &key
                 (iters-count 100)
@@ -381,7 +472,6 @@
   (let* ((root-state (read-task-state problem-file))
          (state root-state)
          (best-state state)
-         (game :origami-solver)
          (iteration 0)
          (stop-time (when timeout
                       (+ (get-internal-run-time)
@@ -394,17 +484,20 @@
                          t))
        do
          (incf iteration)
-         (let* ((action (select-next-move game state iters-per-move
-                                          :timeout-in-seconds (when timeout (/ timeout iters-count)))))
+         (let* ((action (get-best-move
+                         (select-next-move
+                          (make-node-for-state state) state
+                          iters-per-move
+                          :timeout-in-seconds (when timeout (/ timeout iters-count))))))
            (when (null action)
              (format t "No more actions found")
              (return))
-           (setf state (next-state game state action))
+           (setf state (next-state state action))
            (when (> (field-score state)
                     (field-score best-state))
              (setf best-state state))
-           (format t "Iteration ~A score ~,3F~%"
-                   iteration (field-score state))
+           (format t "Iteration ~A resemblance ~,3F~%"
+                   iteration (resemblance state))
            (when log-dir
              (let ((file (make-pathname
                           :name (format nil "~A~A" iteration
@@ -416,12 +509,12 @@
                (draw-polygons-to-svg (if (= iteration 1)
                                          (target-field state)
                                          (field state)) :filename file)))))
-    (format t "Selected state with score ~,3F~%" (field-score best-state))
+    (format t "Selected state with resemblance ~,3F~%" (resemblance best-state))
     (let* ((path (pathname solution-file))
            (name (pathname-name path))
            (type (pathname-type path))
            (dir (make-pathname :directory (pathname-directory path)))
-           (filename (if (= (field-score best-state) 1)
+           (filename (if (= (resemblance best-state) 1)
                          (format nil "~A/../maybe_good_solutions/~A.~A" dir name type)
                          solution-file)))
       (with-open-file
@@ -429,12 +522,14 @@
                              :direction :output
                              :if-exists :supersede
                              :if-does-not-exist :create)
-        (print-solution (field best-state)
-                        :matrix (inverse-tr-matrix
-                                 (adjustment-matrix state)))
-        (field-score best-state)))))
+        (print-solution (field best-state) :matrix (inverse-tr-matrix
+                                                    (adjustment-matrix state)))
+        (resemblance best-state))
+      (values (field best-state)
+              (inverse-tr-matrix
+               (adjustment-matrix state))))))
 
-(defmethod clone-state (_ (st game-state))
+(defmethod clone-state ((st game-state))
   st)
 
 (defclass action ()
@@ -457,12 +552,7 @@
   (format t "(action: line ~A side ~A)"
           (folding-line a) (folding-side a)))
 
-(defmethod next-state (_ (st game-state) (action action))
-  ;; (let ((partials (partial-folds (field st)
-  ;;                                (folding-line action)
-  ;;                                (folding-side action))))
-  ;;   (when (not (null partials))
-  ;;     (break)))
+(defmethod next-state ((st game-state) (action action))
   (let ((new-field (if (polygons-to-fold action)
                        (fold-some-polygons-in-list
                         (field st)
@@ -473,23 +563,29 @@
                         (field st)
                         (folding-line action)
                         (folding-side action)))))
-    (copy-instance
-     st
-     :field new-field
-     :field-score (get-field-score new-field (target-field st)))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score new-field (target-field st))
+      (copy-instance
+       st
+       :field new-field
+       :field-score score
+       :resemblance resemblance))))
 
-(defmethod next-state (_ (st game-state) (action adjustment-action))
+(defmethod next-state ((st game-state) (action adjustment-action))
   (let* ((matrix (adjustment-matrix action))
          (new-silhouette (mult-polygons-matrix (target-field st)
                                                matrix)))
     (assert (equal (identity-tr-matrix)
                    (mult-tr-matrix matrix (inverse-tr-matrix matrix))))
-    (copy-instance
-     st
-     :target-field new-silhouette
-     :adjusted t
-     :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
-     :field-score (get-field-score (field st) new-silhouette))))
+    (multiple-value-bind (score resemblance)
+        (get-field-score (field st) new-silhouette)
+      (copy-instance
+       st
+       :target-field new-silhouette
+       :adjusted t
+       :adjustment-matrix (mult-tr-matrix matrix (adjustment-matrix st))
+       :field-score score
+       :resemblance resemblance))))
 
 (defun find-non-collinear-point (line polygon)
   (dolist (pt (point-list polygon))
@@ -603,27 +699,55 @@
   (loop for matr in (possible-adjustment-matrices st) collect
        (make-instance 'adjustment-action :adjustment-matrix matr)))
 
-(defmethod possible-actions (_ (st game-state))
+(defmethod possible-actions ((st game-state))
   (if (adjusted st)
       (possible-folds-actions st)
       (possible-adjustment-actions st)))
 
 (defun get-field-score (field target-field)
-  (compute-score-for-polygons target-field field))
+  (let ((size (length (with-output-to-string (s)
+                        (print-solution field :stream s))))
+        (resemblance (compute-score-for-polygons target-field field)))
+    ;; (format t "field size = ~A; " size) 
+    ;; (format t "resemblance = ~A~%" (+ 0.0 resemblance))
+    (values
+     (if (> size 5000)
+         0
+         (- resemblance
+            (* 1/13 (/ size 5000))))
+     resemblance)))
 
-(defmethod estimate-state-reward (g (st game-state))
+(defmethod estimate-state-reward ((st game-state))
+  ;; (labels ((%once (st)
+  ;;            (let* ((actions (possible-actions st))
+  ;;                   (actions-num (length actions))
+  ;;                   (best-st st))
+  ;;              (when actions
+  ;;                (loop for i below 10 do
+  ;;                     (let* ((action (nth (random actions-num) actions)))
+  ;;                       (setf st (next-state st action))
+  ;;                       (if (< (field-score best-st)
+  ;;                              (field-score st))
+  ;;                           (setf best-st st)))))
+  ;;              (field-score best-st)))))
+  ;; (with-scale (32) 
+  ;;   (apply #'max 
+  ;;          (loop for i below 10 collect (%once st))))
+  ;; (loop for i below 10 do
+  ;;       (setf st (%once st)))
+  ;; st)
   (labels ((%once (st)
-             (let* ((actions (possible-actions g st))
+             (let* ((actions (possible-actions st))
                     (actions-num (length actions)))
                (loop for i below actions-num do
                     (let* ((action (nth (random actions-num) actions))
-                           (next-st (next-state g st action)))
+                           (next-st (next-state st action)))
                       (when (< (field-score st)
                                (field-score next-st))
                         (return-from %once next-st))))
                st)))
     (loop for i below 10 do
-          (setf st (%once st)))
+         (setf st (%once st)))
     ;; (format t "estimate-state-reward:~%")
     ;; (format t "field: ~A~%" (mapcar #'polygon->list (field st)))
     ;; (format t "score: ~A~%" (field-score st))
