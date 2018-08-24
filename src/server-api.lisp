@@ -10,7 +10,7 @@
 
 (defun get-latest-snapshot ()
   (sleep 1)
-  (asdf::run-shell-command 
+  (uiop::run-program 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' 'http://2016sv.icfpcontest.org/api/snapshot/list' > /tmp/snapshot"
 	   (get-team-key)))
   (with-open-file (foo "/tmp/snapshot")
@@ -27,7 +27,7 @@
 
 (defun blob-lookup (blob-hash blob-type &optional problem-id)
   (sleep 1)
-  (asdf::run-shell-command 
+  (uiop::run-program 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' 'http://2016sv.icfpcontest.org/api/blob/~A' > /tmp/blob"
 	   (get-team-key) blob-hash))
   (with-open-file (foo "/tmp/blob")
@@ -35,8 +35,8 @@
       (:snapshot (yason::parse foo))
       (:problem 
        (format t "problem:~A~%" problem-id)
-       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/problems/~A" problem-id))
-       (asdf::run-shell-command (format nil "cp /tmp/blob /tmp/newproblems/~A" problem-id))
+       (uiop::run-program (format nil "cp /tmp/blob /tmp/problems/~A" problem-id))
+       (uiop::run-program (format nil "cp /tmp/blob /tmp/newproblems/~A" problem-id))
        )
       (:solution
        ;;copy to solutions_from_server
@@ -57,7 +57,7 @@
 
 (defun submit-solution (problem-id path-to-sol-file)
   (sleep 1)
-  (asdf::run-shell-command 
+  (uiop::run-program 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'problem_id=~A' -F 'solution_spec=@~A' 'http://2016sv.icfpcontest.org/api/solution/submit' > /tmp/solution"
 	   (get-team-key) problem-id path-to-sol-file))
   (with-open-file (foo "/tmp/solution")
@@ -79,9 +79,9 @@
 	  (let ((res (submit-solution (pathname-name f) (namestring f))))
 	    (case res
 	      (:solved ;;move to good_solutions
-	       (asdf::run-shell-command
+	       (uiop::run-program
 		(format nil "mv ~A ~A/~A.txt" (namestring f) good-folder (pathname-name f)))
-	       (asdf::run-shell-command
+	       (uiop::run-program
 		(format nil "cp ~A/~A ~A/~A.txt" problem-folder (pathname-name f)
 			solved-problem-folder (pathname-name f))))
 	      (:partial
@@ -97,7 +97,7 @@
 
 (defun submit-problem (path-to-prob-file timestamp)
   (sleep 1)
-  (asdf::run-shell-command 
+  (uiop::run-program 
    (format nil "curl --compressed -L -H Expect: -H 'X-API-Key: ~A' -F 'solution_spec=@~A' -F 'publish_time=~A' 'http://2016sv.icfpcontest.org/api/problem/submit' > /tmp/problem"
 	   (get-team-key) path-to-prob-file timestamp))
   (with-open-file (foo "/tmp/problem")
